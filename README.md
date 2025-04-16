@@ -13,3 +13,11 @@ Raccolta completa di lezioni, esercizi e risorse per:
 - **Sistemi e Reti** (architetture, protocolli, cybersecurity)  
 
 Adatto a studenti e docenti di istituti tecnici (ITIS, ITTS).
+
+## 👨‍🏫 Autore
+**Matteo Patisso**  
+- Docente di Laboratorio Informatica
+- Presso: ITTS C. Grassi
+- 📧 Email: pull-antsy-dropout@duck.com
+
+*"Condividere conoscenza è il modo migliore per innovare."*
