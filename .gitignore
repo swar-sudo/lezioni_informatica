@@ -6,4 +6,4 @@
 !*.md
 !*.yml
 !.gitignore
-!./img/*
+!/img/**/*
