@@ -1,0 +1,8 @@
+#Ignora tutto
+*
+./.obsidian/*
+
+#Tranne:
+!*.md
+!*.yml
+!.gitignore
