@@ -1,4 +1,15 @@
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+# 🖥️ Repository di Lezioni - Informatica, TPSIT e Sistemi e Reti  
+*Materiale didattico per istituti tecnici tecnologici indirizzo informatico*  
 
-[cc-by-nc-sa]: https://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+![License](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)  
+*(Vedi [LICENSE.md](LICENSE.md) per i dettagli)*  
+
+---
+
+## 🎯 Obiettivo  
+Raccolta completa di lezioni, esercizi e risorse per:  
+- **Informatica** (fondamenti, programmazione, algoritmi)  
+- **TPSIT** (Tecnologie e Progettazione di Sistemi Informatici)  
+- **Sistemi e Reti** (architetture, protocolli, cybersecurity)  
+
+Adatto a studenti e docenti di istituti tecnici (ITIS, ITTS).
