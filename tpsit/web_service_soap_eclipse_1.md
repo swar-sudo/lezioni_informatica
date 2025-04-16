@@ -2,6 +2,7 @@
 
 Creare un web service SOAP utilizzando Java ed Eclipse è un'ottima introduzione al mondo dei servizi web. Questa guida vi accompagnerà passo dopo passo nella creazione di un semplice servizio SOAP, dalla configurazione dell'ambiente di sviluppo fino alla realizzazione e test del servizio.
 
+![messaggio di richiesta](../img/t.webservicesoap/1.png)
 ## Prerequisiti:
 
 Prima di iniziare, assicuratevi di avere:
