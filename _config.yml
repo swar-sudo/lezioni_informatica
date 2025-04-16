@@ -1,4 +1,5 @@
-remote_theme: pages-themes/minimal@v0.2.0
+#dopo @ il nome del branch stabile
+remote_theme: "jekyll/minima@2.5-stable"
 
 # Configurazione dei plugin
 plugins:
