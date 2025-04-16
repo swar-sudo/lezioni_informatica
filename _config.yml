@@ -1,8 +1,8 @@
-# File: _config.yml
-
+remote_theme: pages-themes/minimal@v0.2.0
 # Configurazione dei plugin
 plugins:
   - jekyll-relative-links
+  - jekyll-remote-theme
 
 # Configurazione dei link relativi
 relative_links:
