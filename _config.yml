@@ -1,5 +1,5 @@
 #dopo @ il nome del branch stabile
-remote_theme: "jekyll/minima@2.5-stable"
+#remote_theme: "jekyll/minima@2.5-stable"
 
 # Configurazione dei plugin
 plugins:
