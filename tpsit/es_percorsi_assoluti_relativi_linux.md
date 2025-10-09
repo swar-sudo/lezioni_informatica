@@ -81,5 +81,5 @@ Usa **esclusivamente path relativi** per tutti gli esercizi seguenti.
 - Verifica il contenuto delle directory con: `ls [directory]`
 
 ## Consegnare
-- File .zip della cartella Progetti finita
+- File .zip della cartella Progetti finita, utilizzando il comando **tar**
 - Lista dei comandi usati nella Prima Parte e Seconda Parte
