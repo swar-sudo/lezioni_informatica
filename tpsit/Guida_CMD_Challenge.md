@@ -86,6 +86,3 @@
 - Usare opzioni interattive (`-i`) quando disponibili per confermare azioni  
 
 ---
-
-Questa guida raccoglie i comandi e i concetti più utili per affrontare le sfide del **CMD Challenge**.  
-È pensata come riferimento rapido per lo studio e la pratica dei comandi Unix/Linux.
