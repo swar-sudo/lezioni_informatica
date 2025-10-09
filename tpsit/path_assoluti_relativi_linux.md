@@ -1,4 +1,4 @@
-# Esercitazione su Path Assoluti e Relativi - Linux Shell
+# Path Assoluti e Relativi - Linux Shell
 
 ## Setup Iniziale
 Crea all'interno della cartella **Progetti** il seguente albero di directory:
@@ -64,7 +64,7 @@ Usa **esclusivamente path relativi** per tutti gli esercizi seguenti.
 
 ---
 
-## Note per gli Studenti
+## Note
 
 - **Path assoluto**: parte sempre dalla root (/) o dalla home (~)
   - Esempio: `/home/utente/Progetti/laboratorio/codice`
@@ -73,9 +73,13 @@ Usa **esclusivamente path relativi** per tutti gli esercizi seguenti.
   - `../` per salire di un livello
   - `./` per la directory corrente
   - Esempio: `../../backup/settimanale`
-
+    
 - Comando per copiare: `cp [origine] [destinazione]`
 
 - Verifica la tua posizione con: `pwd`
 
 - Verifica il contenuto delle directory con: `ls [directory]`
+
+## Consegnare
+- File .zip della cartella Progetti finita
+- Lista dei comandi usati nella Prima Parte e Seconda Parte
