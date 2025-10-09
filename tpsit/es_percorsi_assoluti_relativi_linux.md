@@ -1,4 +1,4 @@
-# Path Assoluti e Relativi - Linux Shell
+# Esercizio Percorsi Assoluti e Relativi - Linux Shell
 
 ## Setup Iniziale
 Crea all'interno della cartella **Progetti** il seguente albero di directory:
