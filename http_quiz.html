@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Flashcard: Networking Essentials (Versione Finale)</title>
+    <style>
+        /* Stili CSS */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        #flashcard {
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            /* La larghezza della flashcard sarà usata per dimensionare il riquadro del meme */
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        
+        /* Stili Base per TUTTI i pulsanti di azione */
+        .buttons-container button, #continue-btn {
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s, transform 0.1s;
+            min-width: 100px;
+        }
+        
+        /* Stili specifici per Vero/Falso */
+        .buttons-container button {
+            margin: 0 10px;
+            background-color: #28a745; /* Verde (Vero) */
+        }
+
+        .buttons-container button:hover {
+            transform: translateY(-2px);
+        }
+
+        #false-btn {
+            background-color: #dc3545; /* Rosso (Falso) */
+        }
+
+        #false-btn:hover {
+            background-color: #c82333;
+        }
+        
+        /* Stili specifici per Continua */
+        #continue-btn {
+            background-color: #007bff; /* Blu primario */
+            display: block; 
+            margin: 15px auto 0 auto; 
+            width: fit-content; 
+            min-width: 250px; 
+        }
+        
+        #continue-btn:hover {
+             background-color: #0056b3;
+             transform: translateY(-2px);
+        }
+        #continue-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Stili di feedback e contenitori */
+        #result-message {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .victory {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .try-again {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #counter {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: #6c757d;
+        }
+
+        #progress {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        /* Stili per il Feedback Errore */
+        #explanation-box {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 5px solid #ffc107;
+            background-color: #fffbe6;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 0.95em;
+            color: #856404;
+        }
+
+        #explanation-box strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+            color: #ffc107;
+        }
+        
+        /* Stili per il riquadro del Meme (visibile solo alla fine se si sbaglia) */
+        #retry-meme-box {
+            display: none;
+            margin-top: 20px;
+            padding: 0; 
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            overflow: hidden; /* Assicura che l'immagine non sborderi */
+            /* La larghezza del box è garantita dal contenitore quiz-container (max-width: 600px) */
+            max-width: 100%;
+        }
+
+        #retry-meme-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>🧠 Networking Flashcard Quiz</h1>
+        
+        <div id="progress">Domanda 1 di 20</div>
+
+        <div id="flashcard">
+            Clicca su Vero o Falso per iniziare il quiz!
+        </div>
+
+        <div class="buttons-container" id="answer-buttons">
+            <button id="true-btn">Vero</button>
+            <button id="false-btn">Falso</button>
+        </div>
+
+        <div id="explanation-box">
+            <strong>💡 Spiegazione:</strong>
+            <span id="explanation-text"></span>
+        </div>
+        
+        <button id="continue-btn" style="display: none;">Continua alla Prossima Domanda</button>
+
+        <div id="counter">Risposte Corrette: 0</div>
+        
+        <div id="result-message"></div>
+        
+        <div id="retry-meme-box">
+            <img id="retry-meme-img" src="https://www.meme-arsenal.com/memes/3379754a9f716d75a2549a820008c0c0.jpg" alt="Ritenta, sarai più fortunato meme">
+        </div>
+        
+    </div>
+
+    <script>
+        // Array di oggetti per le domande (identico alla versione precedente per mantenere le spiegazioni)
+        const questions = [
+            { statement: "Il protocollo IP (Internet Protocol) opera al Layer 3 (Rete) del modello OSI.", correct: true, explanation: "Corretto. Il protocollo IP è fondamentale per l'instradamento dei pacchetti tra reti diverse ed è il principale protocollo del Layer di Rete (Layer 3)." },
+            { statement: "Uno Switch di rete (come 2960-24TT) opera tipicamente al Layer 1 (Fisico) del modello OSI.", correct: false, explanation: "Falso. Uno Switch opera tipicamente al Layer 2 (Data Link) utilizzando gli indirizzi MAC per inoltrare i frame all'interno della stessa rete locale." },
+            { statement: "Un Router (come ISR4331) ha la funzione principale di inoltrare pacchetti tra reti diverse, operando al Layer 3.", correct: true, explanation: "Corretto. Il Router opera al Layer 3 (Rete) e usa gli indirizzi IP per prendere decisioni di instradamento." },
+            { statement: "Il protocollo DNS (Domain Name System) è usato per tradurre un indirizzo IP in un nome di dominio.", correct: false, explanation: "Falso. Il DNS traduce un **nome di dominio** (es. cognome.nome.grassi.it) nel corrispondente **indirizzo IP**." },
+            { statement: "L'uso di HTTPS al posto di HTTP aggiunge uno strato di sicurezza (TLS/SSL) al Layer di Sessione.", correct: false, explanation: "Falso. HTTPS (HTTP su TLS/SSL) opera al Layer 6 (Presentazione) o Layer 7 (Applicazione), fornendo crittografia per i dati scambiati." },
+            { statement: "L'SSID (Service Set Identifier) è il nome della rete wireless usato su un Access Point.", correct: true, explanation: "Corretto. L'SSID è il nome (come 'Prima LAN') che identifica una rete wireless per gli utenti e i dispositivi." },
+            { statement: "Il Default Gateway è l'indirizzo IP del dispositivo a cui un host invia i pacchetti destinati a host sulla stessa rete locale (LAN).", correct: false, explanation: "Falso. Il Default Gateway è l'indirizzo del Router per i pacchetti destinati a **reti DIVERSE** da quella locale." },
+            { statement: "L'indirizzo 192.168.20.1 è un indirizzo IP pubblico usato su internet.", correct: false, explanation: "Falso. Gli indirizzi che iniziano con 192.168.x.x sono riservati per le reti private e non sono instradabili direttamente su Internet." },
+            { statement: "L'Access Point collega dispositivi wireless ad una rete cablata, operando tipicamente al Layer 2 (Data Link).", correct: true, explanation: "Corretto. L'AP gestisce la connessione a livello di Data Link, collegando il mezzo wireless con il mezzo cablato." },
+            { statement: "Il protocollo HTTP (HyperText Transfer Protocol) si trova al Layer 7 (Applicazione) del modello OSI.", correct: true, explanation: "Corretto. HTTP, come DNS e HTTPS, è un protocollo di alto livello, residente sul Layer di Applicazione (Layer 7)." },
+            { statement: "La subnet mask 255.255.255.0 (/24) permette di avere al massimo 256 indirizzi host utilizzabili nella sottorete.", correct: false, explanation: "Falso. Ci sono 256 indirizzi totali, ma 2 sono riservati (Network ID e Broadcast), lasciando 254 indirizzi host utilizzabili." },
+            { statement: "La simulazione con filtri HTTP, HTTPS, e DNS in Packet Tracer mostra i pacchetti di Application Layer e i loro wrapper.", correct: true, explanation: "Corretto. I filtri permettono di visualizzare il flusso dei pacchetti generati dai protocolli di Application Layer." },
+            { statement: "Per una comunicazione tra due LAN diverse è sempre necessario un Router.", correct: true, explanation: "Corretto. Il Router è l'unico dispositivo che può instradare il traffico (pacchetti IP) tra sottoreti (LAN) differenti." },
+            { statement: "Il ping è un protocollo usato per misurare il tempo impiegato da un pacchetto per raggiungere l'host di destinazione (latency).", correct: false, explanation: "Falso. 'Ping' è il comando/utility. Il protocollo sottostante è l'**ICMP** (Internet Control Message Protocol), usato per i messaggi di errore e di controllo." },
+            { statement: "L'autenticazione WPA2 (Wi-Fi Protected Access 2) è un metodo meno sicuro di WEP per le reti wireless.", correct: false, explanation: "Falso. WPA2 è un metodo di sicurezza molto più robusto e recente rispetto al vecchio e vulnerabile WEP." },
+            { statement: "L'interfaccia `GigabitEthernet0/0/0` su un Router è un esempio di interfaccia Layer 3.", correct: true, explanation: "Corretto. Le interfacce dei Router sono indirizzate con IP e fanno parte del Layer 3 (Rete)." },
+            { statement: "Quando un PC cerca di accedere a un sito web, la prima richiesta inviata è generalmente al DNS Server (se non in cache).", correct: true, explanation: "Corretto. Prima di inviare una richiesta HTTP, il PC deve risolvere il nome di dominio in un IP, inviando una query DNS." },
+            { statement: "In Simulation Mode, cliccare sull'icona PDU (la lettera) non mostra i dettagli dell'incapsulamento del pacchetto.", correct: false, explanation: "Falso. Cliccare sulla busta (PDU) in Simulation Mode è proprio il modo per vedere come il pacchetto viene incapsulato e decapsulato Layer per Layer." },
+            { statement: "Un Server HTTP fornisce solo i servizi DNS e non i contenuti del sito web.", correct: false, explanation: "Falso. Un Server HTTP ha il compito primario di fornire i contenuti (pagine HTML, immagini, ecc.) di un sito web. Il Server DNS è un servizio separato." },
+            { statement: "Settare un IP address e una subnet mask sull'interfaccia di un Router si fa in modalità `interface` della CLI.", correct: true, explanation: "Corretto. Si usano i comandi `interface gigabitEthernet0/0/0`, `ip address ...`, e `no shutdown` all'interno della modalità di configurazione specifica dell'interfaccia." }
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let quizStarted = false;
+
+        const flashcardDiv = document.getElementById('flashcard');
+        const trueBtn = document.getElementById('true-btn');
+        const falseBtn = document.getElementById('false-btn');
+        const counterDiv = document.getElementById('counter');
+        const resultMessageDiv = document.getElementById('result-message');
+        const progressDiv = document.getElementById('progress');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const continueBtn = document.getElementById('continue-btn');
+        const answerButtonsContainer = document.getElementById('answer-buttons');
+        const retryMemeBox = document.getElementById('retry-meme-box');
+
+
+        // Funzione per visualizzare la flashcard corrente
+        function displayQuestion() {
+            explanationBox.style.display = 'none'; 
+            continueBtn.style.display = 'none'; 
+            answerButtonsContainer.style.display = 'block'; 
+            flashcardDiv.style.backgroundColor = '#e9ecef'; 
+
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                flashcardDiv.textContent = q.statement;
+                progressDiv.textContent = `Domanda ${currentQuestionIndex + 1} di ${questions.length}`;
+            } else {
+                showResults();
+            }
+        }
+
+        // Funzione per gestire la risposta
+        function handleAnswer(userAnswer) {
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                
+                trueBtn.disabled = true;
+                falseBtn.disabled = true;
+                answerButtonsContainer.style.pointerEvents = 'none'; 
+
+                if (userAnswer === q.correct) {
+                    // Risposta Corretta
+                    correctCount++;
+                    flashcardDiv.style.backgroundColor = '#d4edda'; 
+                    
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        trueBtn.disabled = false;
+                        falseBtn.disabled = false;
+                        answerButtonsContainer.style.pointerEvents = 'auto'; 
+                        displayQuestion();
+                    }, 800); 
+
+                } else {
+                    // Risposta Sbagliata - Mostra Spiegazione e Pulsante Continua
+                    flashcardDiv.style.backgroundColor = '#f8d7da'; 
+                    explanationText.textContent = q.explanation;
+                    explanationBox.style.display = 'block';
+                    
+                    continueBtn.style.display = 'block';
+                    answerButtonsContainer.style.display = 'none'; 
+                }
+
+                counterDiv.textContent = `Risposte Corrette: ${correctCount}`;
+            }
+        }
+        
+        // Funzione per procedere alla prossima domanda dopo il feedback
+        function nextQuestion() {
+            currentQuestionIndex++;
+            trueBtn.disabled = false;
+            falseBtn.disabled = false;
+            answerButtonsContainer.style.pointerEvents = 'auto'; 
+            displayQuestion();
+        }
+
+
+        // Funzione per mostrare i risultati finali
+        function showResults() {
+            answerButtonsContainer.style.display = 'none';
+            progressDiv.style.display = 'none';
+            explanationBox.style.display = 'none';
+            continueBtn.style.display = 'none';
+            retryMemeBox.style.display = 'none'; // Nasconde il meme di default
+            
+            flashcardDiv.textContent = `Quiz Completato! Hai risposto correttamente a ${correctCount} domande su ${questions.length}.`;
+            flashcardDiv.style.backgroundColor = '#fff3cd'; 
+            
+            resultMessageDiv.style.display = 'block';
+
+            if (correctCount === questions.length) {
+                resultMessageDiv.textContent = "🏆 VITTORIA! Risposte Corrette al 100%! Ottimo Lavoro! 🏆";
+                resultMessageDiv.className = 'victory';
+            } else {
+                resultMessageDiv.textContent = "😔 Ritenta! Non tutte le risposte sono corrette. Riprova per padroneggiare i concetti! 😔";
+                resultMessageDiv.className = 'try-again';
+                // MOSTRA IL MEME QUANDO L'UTENTE DEVE RITENTARE
+                retryMemeBox.style.display = 'block';
+            }
+            counterDiv.style.fontWeight = 'bold';
+        }
+
+        // Event Listeners sui pulsanti
+        trueBtn.addEventListener('click', () => handleAnswer(true));
+        falseBtn.addEventListener('click', () => handleAnswer(false));
+        continueBtn.addEventListener('click', nextQuestion);
+        
+        // Inizializzazione: avvia il quiz
+        displayQuestion();
+        
+    </script>
+</body>
+</html>
