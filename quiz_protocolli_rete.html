@@ -1,0 +1,454 @@
+
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Protocolli Rete</title>
+    <style>
+        /* Importazione Font Google - NESSUNA LIBRERIA ESTERNA ECCETTO FONT */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+        /* Stili Generali */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* Sfondo scuro e sfumato */
+            color: #ecf0f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .quiz-container {
+            background-color: rgba(30, 45, 60, 0.95); /* Scuro semitrasparente */
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 10px rgba(26, 118, 204, 0.7); /* Ombra profonda con bagliore blu */
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+            border: 2px solid #1a73e8;
+        }
+
+        h1 {
+            color: #4285f4; /* Blu primario */
+            margin-bottom: 25px;
+            font-size: 2.5em;
+            font-weight: 800;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        #progress, #counter {
+            font-weight: 600;
+            color: #a0c4ff;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        
+        /* Flashcard Domanda */
+        #flashcard {
+            background-color: #34495e; /* Grigio-blu scuro */
+            border: 1px solid #2980b9;
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4em;
+            font-weight: 600;
+            line-height: 1.6;
+            transition: background-color 0.3s, border-color 0.3s;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Contenitore Pulsanti */
+        .interaction-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Stili Pulsanti Generici */
+        .buttons-container button, #continue-btn, #hint-btn {
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px; /* Bordi molto arrotondati */
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            transition: all 0.2s ease-in-out;
+            min-width: 150px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Stili Pulsanti Risposta (Vero/Falso) */
+        #true-btn {
+            background: linear-gradient(90deg, #2ecc71, #27ae60); /* Verde Sfumato */
+            color: white;
+        }
+        #true-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.5);
+        }
+
+        #false-btn {
+            background: linear-gradient(90deg, #e74c3c, #c0392b); /* Rosso Sfumato */
+            color: white;
+        }
+        #false-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
+        }
+        
+        .buttons-container button:active {
+             transform: translateY(-1px);
+             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Stili Pulsante Continua */
+        #continue-btn {
+            background: linear-gradient(90deg, #3498db, #2980b9); /* Blu Sfumato */
+            color: white;
+            min-width: 250px;
+            margin: 0 auto;
+        }
+        #continue-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
+        }
+
+        /* Stili Pulsante Hint */
+        #hint-btn {
+            background-color: #f39c12; /* Giallo/Arancio */
+            color: #2c3e50;
+            font-size: 0.9em;
+            padding: 10px 20px;
+            border-radius: 10px;
+            min-width: unset;
+            width: fit-content;
+            margin: 10px auto 0 auto;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        #hint-btn:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+        
+        /* Spiegazione/Feedback */
+        #explanation-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-left: 5px solid #f39c12; /* Linea Gialla */
+            background-color: rgba(52, 73, 94, 0.8); /* Sfondo scuro per contrasto */
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1em;
+            line-height: 1.4;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #explanation-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+            color: #f1c40f; /* Giallo vivo */
+            font-weight: 700;
+        }
+        
+        /* Messaggio Risultato Finale */
+        #result-message {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: 800;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+        }
+
+        .victory {
+            background: linear-gradient(45deg, #1abc9c, #16a085);
+            color: white;
+            box-shadow: 0 0 15px #1abc9c;
+        }
+
+        .try-again {
+            background: linear-gradient(45deg, #e67e22, #d35400);
+            color: white;
+            box-shadow: 0 0 15px #e67e22;
+        }
+
+        /* Responsività */
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .buttons-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .buttons-container button, #continue-btn {
+                min-width: 100%;
+                padding: 12px 20px;
+            }
+            #flashcard {
+                font-size: 1.2em;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>Protocolli Rete 🌐 Quiz</h1>
+        <div id="progress">Domanda 1 di 30</div>
+        
+        <div id="flashcard">
+            Clicca su Vero o Falso per iniziare il quiz!
+        </div>
+
+        <button id="hint-btn">💡 Suggerimento (Non conta il punto)</button>
+        
+        <div class="interaction-area">
+            <div class="buttons-container" id="answer-buttons">
+                <button id="true-btn">Vero</button>
+                <button id="false-btn">Falso</button>
+            </div>
+    
+            <button id="continue-btn" style="display: none;">Continua</button>
+        </div>
+
+        <div id="explanation-box">
+            <strong>💡 Spiegazione:</strong>
+            <span id="explanation-text"></span>
+        </div>
+        
+        <div id="counter">Risposte Corrette: 0</div>
+        
+        <div id="result-message"></div>
+        
+    </div>
+
+    <script>
+        // Array di oggetti per le domande (30 nuove domande su HTTP, DNS, DHCP, RIP)
+        const questions = [
+            { statement: "HTTP è un protocollo stateless, il che significa che il server non conserva lo stato delle sessioni precedenti con lo stesso client tra una richiesta e l'altra.", correct: true, explanation: "Corretto. HTTP è intrinsecamente stateless; ogni richiesta viene gestita in modo indipendente, sebbene meccanismi come i cookie siano usati per gestire lo stato a livello di applicazione." },
+            { statement: "Lo scopo principale di DNS (Domain Name System) è quello di risolvere gli indirizzi IP in nomi di dominio leggibili per l'uomo.", correct: false, explanation: "Falso. La funzione primaria del DNS è risolvere un **nome di dominio** (es. google.com) nel suo corrispondente **indirizzo IP**." },
+            { statement: "DHCP (Dynamic Host Configuration Protocol) è un protocollo usato per assegnare indirizzi IP statici ai client della rete.", correct: false, explanation: "Falso. DHCP è specificamente progettato per l'assegnazione **dinamica** degli indirizzi IP e di altri parametri di configurazione di rete." },
+            { statement: "RIP (Routing Information Protocol) utilizza come metrica principale la larghezza di banda (bandwidth) dei collegamenti per calcolare il percorso migliore.", correct: false, explanation: "Falso. RIP utilizza come metrica unicamente l'**Hop Count** (numero di router o salti) e non considera la larghezza di banda." },
+            { statement: "La porta standard utilizzata da HTTP per le comunicazioni non crittografate è la 443.", correct: false, explanation: "Falso. La porta 443 è usata da HTTPS (la versione sicura). HTTP (non crittografato) utilizza la **porta 80**." },
+            { statement: "I server DNS utilizzano principalmente la porta UDP 53 per le query standard di risoluzione dei nomi per garantire una risoluzione più veloce.", correct: true, explanation: "Corretto. Le query DNS si basano sul protocollo UDP sulla porta 53 per la sua velocità. TCP sulla porta 53 è usato per il trasferimento di zona." },
+            { statement: "Il processo di assegnazione DHCP inizia con il messaggio DHCPDISCOVER, inviato in broadcast dal client.", correct: true, explanation: "Corretto. Il client invia un messaggio in broadcast (DHCPDISCOVER) perché non conosce l'indirizzo IP del Server DHCP." },
+            { statement: "RIP è un protocollo di routing 'Interior Gateway Protocol' (IGP) che opera all'interno di un singolo sistema autonomo (AS).", correct: true, explanation: "Corretto. RIP, come OSPF, è un IGP utilizzato per l'instradamento interno, in contrapposizione ai protocolli EGP come BGP." },
+            { statement: "Un messaggio di risposta HTTP 200 (OK) indica che la risorsa richiesta è stata trovata e inviata con successo al client.", correct: true, explanation: "Corretto. I codici di stato 2xx, come il 200, indicano che la richiesta HTTP è stata elaborata e completata con successo." },
+            { statement: "Il caching (memorizzazione temporanea) delle risposte DNS nei client e nei server intermedi rallenta il processo di risoluzione dei nomi.", correct: false, explanation: "Falso. Il caching DNS è fondamentale per velocizzare la risoluzione dei nomi e ridurre il carico sui server DNS di livello superiore." },
+            { statement: "Il leasing (periodo di affitto) di un indirizzo IP è un concetto centrale in DHCP, permettendo al server di riutilizzare gli indirizzi IP non più in uso dopo un certo periodo.", correct: true, explanation: "Corretto. Il meccanismo di lease garantisce che il pool di indirizzi IP sia gestito dinamicamente e che gli indirizzi inutilizzati vengano recuperati." },
+            { statement: "RIP ha un limite massimo di 15 hop; una rete con più di 15 salti è considerata irraggiungibile.", correct: true, explanation: "Corretto. Questa limitazione (Max Hop Count di 15) è una caratteristica chiave di RIP e ne limita l'uso nelle reti estese." },
+            { statement: "Il metodo HTTP POST è usato tipicamente per inviare dati (come moduli o credenziali) al server per l'elaborazione.", correct: true, explanation: "Corretto. Il metodo POST è progettato per inviare dati al corpo della richiesta, spesso utilizzato per l'invio di dati sensibili o l'elaborazione di moduli." },
+            { statement: "Se il DNS non riuscisse a risolvere un nome di dominio in un IP, la richiesta HTTP al server web può comunque partire grazie all'indirizzo MAC.", correct: false, explanation: "Falso. L'indirizzo IP di destinazione (ottenuto tramite DNS) è fondamentale per l'instradamento a livello di rete (Layer 3), che deve avvenire prima della richiesta HTTP." },
+            { statement: "Oltre all'indirizzo IP, il server DHCP può fornire solo la Subnet Mask e il Default Gateway.", correct: false, explanation: "Falso. DHCP può fornire anche altri parametri essenziali, come l'indirizzo del DNS Server, il tempo di lease e opzioni specifiche per i servizi di rete." },
+            { statement: "RIPv2 ha migliorato RIPv1 introducendo il supporto per le VLSM (Variable Length Subnet Mask), rendendolo un protocollo classless.", correct: true, explanation: "Corretto. L'introduzione del supporto VLSM e CIDR ha reso RIPv2 un protocollo classless, superando il limite di RIPv1." },
+            { statement: "HTTP opera al Layer di Rete (Layer 3) del modello OSI.", correct: false, explanation: "Falso. HTTP è un protocollo di alto livello che opera al Layer di **Applicazione (Layer 7)** del modello OSI." },
+            { statement: "Un record AAAA nel DNS mappa un nome di dominio a un indirizzo IPv4.", correct: false, explanation: "Falso. Un record AAAA è per gli indirizzi **IPv6**. Il record A (Address) è usato per gli indirizzi IPv4." },
+            { statement: "Il server DHCP è l'unico dispositivo che può essere configurato con un indirizzo IP statico sulla rete, mentre tutti gli altri devono essere dinamici.", correct: false, explanation: "Falso. Anche il Default Gateway (Router) e tutti i Server (DNS, Web, ecc.) devono avere indirizzi IP statici per garantire l'accessibilità costante." },
+            { statement: "RIP invia aggiornamenti completi della sua tabella di routing ogni 30 secondi, anche se non ci sono state modifiche, causando traffico non necessario.", correct: true, explanation: "Corretto. Questa è una delle inefficienze di RIP: l'invio periodico e completo della tabella, indipendentemente dai cambiamenti." },
+            { statement: "L'uso di HTTPS (HTTP su TLS/SSL) è necessario solo per le pagine di login e pagamento, non per i contenuti statici di un sito web.", correct: false, explanation: "Falso. HTTPS è caldamente raccomandato per tutto il traffico web (anche contenuti statici) per prevenire attacchi, garantire l'integrità dei dati e migliorare il posizionamento sui motori di ricerca." },
+            { statement: "Se un client DNS ha in cache la risoluzione di un nome di dominio, ignorerà il server DNS per quella richiesta, anche se il TTL è scaduto.", correct: false, explanation: "Falso. La durata di una voce in cache è limitata dal TTL (Time To Live). Una volta scaduto il TTL, il client deve eseguire una nuova query DNS." },
+            { statement: "DHCP utilizza messaggi in broadcast per le fasi iniziali (Discover e Request) per garantire che tutti i dispositivi di rete possano vedere la comunicazione.", correct: true, explanation: "Corretto. I messaggi DHCPDISCOVER e DHCPREQUEST sono inviati in broadcast per poter raggiungere il server DHCP e gli altri client sulla rete locale." },
+            { statement: "RIP è considerato un protocollo molto scalabile e moderno, adatto per le grandi reti aziendali di oggi.", correct: false, explanation: "Falso. RIP è considerato obsoleto e non scalabile a causa della sua metrica limitata (max 15 hop) e del tempo di convergenza lento, non è adatto per grandi reti." },
+            { statement: "Un Server HTTP fornisce solo i servizi DNS e non i contenuti del sito web (pagine HTML, immagini, ecc.).", correct: false, explanation: "Falso. Il Server HTTP ha il compito primario di fornire i contenuti del sito web. Il servizio DNS è fornito da un Server DNS dedicato." },
+            { statement: "Il ping è il protocollo sottostante usato per misurare il tempo impiegato da un pacchetto per raggiungere l'host di destinazione (latency).", correct: false, explanation: "Falso. 'Ping' è il comando/utility. Il protocollo sottostante usato per i messaggi di richiesta/risposta di eco è l'ICMP (Internet Control Message Protocol)." },
+            { statement: "In una rete ben progettata, il Router (Default Gateway) dovrebbe ottenere il suo indirizzo IP dinamicamente da un Server DHCP.", correct: false, explanation: "Falso. I Router devono avere indirizzi IP statici perché i client li usino come Default Gateway. Ottenere un IP dinamico complicherebbe l'affidabilità della rete." },
+            { statement: "Lo scopo di un protocollo di routing come RIP è informare i Router sulla topologia della rete, permettendo loro di inoltrare i pacchetti verso reti remote.", correct: true, explanation: "Corretto. I protocolli di routing sono essenziali per costruire le tabelle di routing, permettendo l'instradamento del traffico verso sottoreti diverse." },
+            { statement: "Quando un PC cerca di accedere a un sito web, la prima richiesta di protocollo inviata (se l'IP non è noto) è tipicamente al Server HTTP.", correct: false, explanation: "Falso. La prima richiesta è una query DNS (risoluzione del nome) per ottenere l'indirizzo IP del server web, che precede la richiesta HTTP." },
+            { statement: "RIPv1 è un protocollo classful, il che significa che ignora le informazioni sulla subnet mask e presume che tutte le sottoreti appartengano alla stessa classe di indirizzi.", correct: true, explanation: "Corretto. RIPv1 è classful e non invia la subnet mask negli aggiornamenti di routing, limitando la sua flessibilità in reti VLSM." }
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let hintUsed = false; // Stato per tracciare se l'hint è stato usato per la domanda corrente
+        
+        // Elementi DOM
+        const flashcardDiv = document.getElementById('flashcard');
+        const trueBtn = document.getElementById('true-btn');
+        const falseBtn = document.getElementById('false-btn');
+        const counterDiv = document.getElementById('counter');
+        const resultMessageDiv = document.getElementById('result-message');
+        const progressDiv = document.getElementById('progress');
+        const explanationBox = document.getElementById('explanation-box');
+        const explanationText = document.getElementById('explanation-text');
+        const continueBtn = document.getElementById('continue-btn');
+        const answerButtonsContainer = document.getElementById('answer-buttons');
+        const hintBtn = document.getElementById('hint-btn');
+        const totalQuestions = questions.length;
+
+
+        // Funzione per ripristinare i pulsanti allo stato attivo
+        function enableButtons() {
+            trueBtn.disabled = false;
+            falseBtn.disabled = false;
+            hintBtn.disabled = false;
+            answerButtonsContainer.style.pointerEvents = 'auto';
+            hintBtn.style.opacity = 1;
+        }
+
+        // Funzione per disabilitare i pulsanti durante il feedback
+        function disableButtons() {
+            trueBtn.disabled = true;
+            falseBtn.disabled = true;
+            hintBtn.disabled = true; // Disabilita l'hint dopo la risposta
+            answerButtonsContainer.style.pointerEvents = 'none';
+        }
+
+        // Funzione per visualizzare la flashcard corrente
+        function displayQuestion() {
+            // Reset dello stato
+            hintUsed = false; 
+            explanationBox.style.display = 'none';
+            continueBtn.style.display = 'none';
+            answerButtonsContainer.style.display = 'flex';
+            hintBtn.style.display = 'block'; // Mostra l'hint all'inizio di ogni domanda
+            flashcardDiv.style.backgroundColor = '#34495e';
+            resultMessageDiv.style.display = 'none';
+            progressDiv.style.display = 'block';
+            counterDiv.style.fontWeight = 'normal';
+            enableButtons();
+
+            if (currentQuestionIndex < totalQuestions) {
+                const q = questions[currentQuestionIndex];
+                flashcardDiv.textContent = q.statement;
+                progressDiv.textContent = `Domanda ${currentQuestionIndex + 1} di ${totalQuestions}`;
+            } else {
+                showResults();
+            }
+        }
+
+        // Funzione per gestire la risposta
+        function handleAnswer(userAnswer) {
+            if (currentQuestionIndex < totalQuestions) {
+                const q = questions[currentQuestionIndex];
+                
+                disableButtons(); // Blocca ulteriori click
+                hintBtn.style.display = 'none'; // Nasconde l'hint dopo la risposta
+
+                if (userAnswer === q.correct) {
+                    // Risposta Corretta
+                    
+                    // Contiamo il punto SOLO se l'hint NON è stato usato
+                    if (!hintUsed) {
+                        correctCount++;
+                    }
+                    
+                    flashcardDiv.style.backgroundColor = '#16a085'; // Verde vivo
+                    
+                    setTimeout(() => {
+                        currentQuestionIndex++;
+                        enableButtons();
+                        displayQuestion();
+                    }, 800);
+                } else {
+                    // Risposta Sbagliata - Mostra Spiegazione e Pulsante Continua
+                    flashcardDiv.style.backgroundColor = '#e74c3c'; // Rosso vivo
+                    explanationText.textContent = q.explanation;
+                    explanationBox.style.display = 'block';
+                    
+                    // Mostra il pulsante "Continua" e nasconde i pulsanti di risposta
+                    continueBtn.style.display = 'block';
+                    answerButtonsContainer.style.display = 'none';
+                }
+
+                updateCounterDisplay();
+            }
+        }
+        
+        // Aggiorna il contatore
+        function updateCounterDisplay() {
+            counterDiv.textContent = `Risposte Corrette: ${correctCount} su ${currentQuestionIndex}`;
+            if (currentQuestionIndex === 0) {
+                counterDiv.textContent = `Risposte Corrette: ${correctCount}`;
+            }
+        }
+
+        // Funzione per mostrare l'hint
+        function showHint() {
+            if (currentQuestionIndex < totalQuestions && !hintUsed) {
+                const q = questions[currentQuestionIndex];
+                
+                explanationText.textContent = q.explanation;
+                explanationBox.style.display = 'block';
+                
+                // Segnala l'uso dell'hint
+                hintUsed = true;
+                hintBtn.disabled = true;
+                hintBtn.style.opacity = 0.5; // Feedback visivo che l'hint è stato usato
+                
+                // Opzionalmente, informiamo l'utente che il punto non sarà contato
+                counterDiv.textContent = `Risposte Corrette: ${correctCount} (L'hint è stato usato, non otterrai il punto)`;
+                counterDiv.style.fontWeight = 'bold';
+            }
+        }
+        
+        // Funzione per procedere alla prossima domanda dopo il feedback
+        function nextQuestion() {
+            currentQuestionIndex++;
+            enableButtons();
+            displayQuestion();
+        }
+
+        // Funzione per mostrare i risultati finali
+        function showResults() {
+            answerButtonsContainer.style.display = 'none';
+            progressDiv.style.display = 'none';
+            explanationBox.style.display = 'none';
+            continueBtn.style.display = 'none';
+            hintBtn.style.display = 'none';
+            
+            flashcardDiv.textContent = `Quiz Completato! Hai risposto correttamente a ${correctCount} domande su ${totalQuestions}.`;
+            flashcardDiv.style.backgroundColor = '#f1c40f'; // Giallo per i risultati
+            
+            resultMessageDiv.style.display = 'block';
+
+            if (correctCount === totalQuestions) {
+                resultMessageDiv.textContent = "🚀 MISSIONE COMPIUTA! Risposte Corrette al 100%! Sei un esperto di networking! 🚀";
+                resultMessageDiv.className = 'victory';
+            } else {
+                const percentage = Math.round((correctCount / totalQuestions) * 100);
+                resultMessageDiv.textContent = `Risultato: ${percentage}% corretto. Ritenta per raggiungere la perfezione!`;
+                resultMessageDiv.className = 'try-again';
+            }
+            counterDiv.textContent = `Totale Punti: ${correctCount} / ${totalQuestions}`;
+            counterDiv.style.fontWeight = '800';
+            counterDiv.style.fontSize = '1.3em';
+        }
+
+        // Event Listeners sui pulsanti
+        trueBtn.addEventListener('click', () => handleAnswer(true));
+        falseBtn.addEventListener('click', () => handleAnswer(false));
+        continueBtn.addEventListener('click', nextQuestion);
+        hintBtn.addEventListener('click', showHint);
+        
+        // Inizializzazione: avvia il quiz
+        window.onload = displayQuestion;
+        
+    </script>
+</body>
+</html>
