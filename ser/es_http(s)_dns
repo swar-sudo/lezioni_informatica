@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+    <title>Esercizio HTTP e DNS - Packet Tracer | lezioni_informatica</title>
+    <meta name="generator" content="Jekyll v3.10.0" />
+    <meta property="og:title" content="Esercizio HTTP e DNS - Packet Tracer" />
+    <meta property="og:locale" content="it_IT" />
+    <link rel="canonical" href="https://swar-sudo.github.io/lezioni_informatica/sistemi/esercizio_http_dns.html" />
+    <meta property="og:url" content="https://swar-sudo.github.io/lezioni_informatica/sistemi/esercizio_http_dns.html" />
+    <meta property="og:site_name" content="lezioni_informatica" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta property="twitter:title" content="Esercizio HTTP e DNS - Packet Tracer" />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","headline":"Esercizio HTTP e DNS - Packet Tracer","name":"lezioni_informatica","url":"https://swar-sudo.github.io/lezioni_informatica/sistemi/esercizio_http_dns.html"}
+    </script>
+    <!-- End Jekyll SEO tag -->
+    <link rel="stylesheet" href="/lezioni_informatica/assets/css/style.css?v=05a839b83e4a43fdc8ee8857b5899a52aa5996ae">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+    <!-- Setup Google Analytics -->
+    <!-- You can set your favicon here -->
+    <!-- link rel="shortcut icon" type="image/x-icon" href="/lezioni_informatica/favicon.ico" -->
+    <!-- end custom head snippets -->
+</head>
+<body>
+    <div class="container-lg px-3 my-5 markdown-body">
+        <h1><a href="https://swar-sudo.github.io/lezioni_informatica/">lezioni_informatica</a></h1>
+        
+        <h1 id="esercizio-http-dns">🌐 Esercizio HTTP e DNS - Packet Tracer</h1>
+        
+        <p><em>Configurazione di reti LAN con servizi HTTP, HTTPS e DNS</em></p>
+        
+        <p style="text-align: center;">
+            <img src="https://swar-sudo.github.io/lezioni_informatica/img/s.pt_http_s_dns.png" alt="Schema rete HTTP DNS" style="max-width: 100%; height: auto;">
+        </p>
+        
+        <hr />
+        
+        <h2 id="consegna">📦 Consegna</h2>
+        
+        <ul>
+            <li>File Google Documenti contenente gli screenshot di ogni passaggio</li>
+            <li>File <code>.pkt</code> chiamato <strong>cognome_http_dns</strong></li>
+            <li>Completa l'<strong>HTTP Quiz</strong></li>
+        </ul>
+        
+        <hr />
+        
+        <h2 id="prima-lan">🔧 Prima LAN</h2>
+        
+        <ol>
+            <li>Creiamo lo scenario come in foto</li>
+            <li>Cambiamo SSID nell'AP, autenticazione come WPA2 con passphrase.</li>
+            <li>Cambiare le impostazioni wireless nel tablet. Impostiamo l'IPv4</li>
+            <li>Testiamo la comunicazione tra i dispositivi tramite ping</li>
+        </ol>
+        
+        <hr />
+        
+        <h2 id="seconda-lan">🖥️ Seconda LAN</h2>
+        
+        <ol>
+            <li>Creiamo lo scenario come in foto</li>
+            <li>Impostiamo il server HTTP e il server DNS attivando i servizi opportuni</li>
+            <li>Associamo, nel DNS Server, il nome di dominio (<strong>cognome.nome.grassi.it</strong>) all'Indirizzo IP come record di tipo A.</li>
+            <li>Testiamo con un ping la connessione tra PC1 e i due server</li>
+            <li>Apriamo la modalità Simulazione e scegliamo come Filtri HTTP, HTTPS e DNS</li>
+            <li>Testiamo dal browser in PC1 se il dominio (<code>http://cognome.nome.grassi.it</code>) è raggiungibile</li>
+            <li>In PC1, impostiamo l'indirizzo del DNS Server</li>
+            <li>Apriamo la modalità Simulazione e testiamo nuovamente se il dominio è raggiungibile da PC1</li>
+            <li>Ripetiamo la simulazione ma con HTTPS (<code>https://cognome.nome.grassi.it</code>) e notiamo le differenze cliccando sull'icona della lettera ogni volta che si sposta</li>
+        </ol>
+        
+        <hr />
+        
+        <h2 id="comunicazione-lan">🔗 Comunicazione tra le due LAN</h2>
+        
+        <ol>
+            <li>Mettiamo un router di tipo 4331 tra le due LAN e lo colleghiamo agli switch tramite cavo copper straight through</li>
+            <li>Settiamo nel router i default gateway per ogni interfaccia tramite CLI:
+                <pre><code>enable
+config
+interface gigabitEthernet0/0/0
+ip address 192.168.10.1 255.255.255.0
+no shutdown</code></pre>
+            </li>
+            <li>Impostiamo Default Gateway e DNS Server nei dispositivi della LAN1</li>
+            <li>Impostiamo il Default Gateway nel PC, e nei due server della LAN2</li>
+            <li>Testare la connessione tra le due LAN effettuando un ping tra PC0 di LAN1 e l'HTTP Server in Simulation Mode</li>
+            <li>Testiamo con un ping da PC1 della LAN2 a Laptop0 della LAN1 in Simulation Mode</li>
+        </ol>
+        
+        <hr />
+        
+        <h2 id="test-finale">✅ Ultimo test</h2>
+        
+        <p>Testiamo da Laptop0 l'accesso dal browser al sito in https: <code>https://cognome.nome.grassi.it</code> in Simulation Mode</p>
+        
+        <hr />
+        
+        <h2 id="autore">👨‍🏫 Autore</h2>
+        
+        <p><strong>Matteo Patisso</strong></p>
+        <ul>
+            <li>Docente di Laboratorio Informatica</li>
+            <li>Presso: ITTS C. Grassi</li>
+            <li>📧 Email: pull-antsy-dropout@duck.com</li>
+        </ul>
+        
+        <hr />
+        
+        <p><em>"Condividere conoscenza è il modo migliore per innovare."</em></p>
+        
+        <hr />
+        
+        <p><img src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg" alt="License" /></p>
+        
+        <p><em>(Vedi <a href="/lezioni_informatica/LICENSE.html">LICENSE.md</a> per i dettagli)</em></p>
+        
+        <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+            This site is open source. <a href="https://github.com/swar-sudo/lezioni_informatica/edit/master/sistemi/esercizio_http_dns.html">Improve this page</a>.
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+</body>
+</html>
