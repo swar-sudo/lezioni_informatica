@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Begin Jekyll SEO tag v2.8.0 -->
+    <title>Esercizio Bancomat - Traccia | lezioni_informatica</title>
+    <meta name="generator" content="Jekyll v3.10.0" />
+    <meta property="og:title" content="Esercizio Bancomat - Traccia" />
+    <meta property="og:locale" content="it_IT" />
+    <link rel="canonical" href="https://swar-sudo.github.io/lezioni_informatica/informatica/esercizio_bancomat.html" />
+    <meta property="og:url" content="https://swar-sudo.github.io/lezioni_informatica/informatica/esercizio_bancomat.html" />
+    <meta property="og:site_name" content="lezioni_informatica" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta property="twitter:title" content="Esercizio Bancomat - Traccia" />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebPage","headline":"Esercizio Bancomat - Traccia","name":"lezioni_informatica","url":"https://swar-sudo.github.io/lezioni_informatica/informatica/esercizio_bancomat.html"}
+    </script>
+    <!-- End Jekyll SEO tag -->
+    <link rel="stylesheet" href="/lezioni_informatica/assets/css/style.css?v=05a839b83e4a43fdc8ee8857b5899a52aa5996ae">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+    <!-- Setup Google Analytics -->
+    <!-- You can set your favicon here -->
+    <!-- link rel="shortcut icon" type="image/x-icon" href="/lezioni_informatica/favicon.ico" -->
+    <!-- end custom head snippets -->
+</head>
+<body>
+    <div class="container-lg px-3 my-5 markdown-body">
+        <h1><a href="https://swar-sudo.github.io/lezioni_informatica/">lezioni_informatica</a></h1>
+        
+        <h1 id="esercizio-bancomat">💳 Esercizio Bancomat</h1>
+        
+        <p><em>Traccia di esercizio di programmazione</em></p>
+        
+        <hr />
+        
+        <h2 id="traccia">📝 Traccia</h2>
+        
+        <p>Si supponga di avere un conto in banca con 500 euro e di possedere il bancomat per i prelievi automatici, informazioni sul conto, ecc.</p>
+        
+        <p>Si supponga anche di essersi già recati allo sportello bancomat e di aver inserito la tessera bancomat nell'apposita fessura.</p>
+        
+        <ul>
+            <li>Scrivere un programma che visualizzi la richiesta di accesso del pin (5 numeri) che verifichi che sia quello prefissato (es. 12345).</li>
+            <li>Se il pin è errato mostri la scritta "pin errato – ritirare la tessera bancomat" e il programma termina.</li>
+            <li>Se invece è corretto allora il programma, dopo qualche riga vuota, deve visualizzare la schermata tipica dello sportello bancomat e cioè:</li>
+        </ul>
+        
+        <pre><code>Benvenuto Mario Rossi (mettete il vostro nome e cognome)
+Sei titolare del conto corrente n. 123456789 su questa banca.
+
+MENU DI SCELTA
+---------------------------------------
+Inserisci
+S - per visualizzare il saldo
+L - per visualizzare la lista movimenti
+P - per prelevare
+U - per uscire
+---------------------------------------</code></pre>
+        
+        <p>Se viene inserito un carattere diverso da quelli previsti visualizza un messaggio di errore e il programma termina.</p>
+        
+        <p>Se viene inserito <strong>S</strong> viene visualizzata la scritta "il tuo saldo è 500 euro" e il programma termina.</p>
+        
+        <p>Se viene inserito <strong>L</strong> vengono visualizzate due righe:</p>
+        <pre><code>2/10/24 prelievo bancomat euro 100
+15/10/24 bonifico a Vs favore di euro 200</code></pre>
+        <p>e il programma termina.</p>
+        
+        <p>Se viene inserito <strong>P</strong> viene richiesto l'importo del prelievo e se l'importo è maggiore di 500 viene visualizzato un messaggio di errore e il programma termina, altrimenti il messaggio "ritirare le banconote" e il programma termina.</p>
+        
+        <hr />
+        
+        <h2 id="autore">👨‍🏫 Autore</h2>
+        
+        <p><strong>Matteo Patisso</strong></p>
+        <ul>
+            <li>Docente di Laboratorio Informatica</li>
+            <li>Presso: ITTS C. Grassi</li>
+            <li>📧 Email: pull-antsy-dropout@duck.com</li>
+        </ul>
+        
+        <hr />
+        
+        <p><em>"Condividere conoscenza è il modo migliore per innovare."</em></p>
+        
+        <hr />
+        
+        <p><img src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg" alt="License" /></p>
+        
+        <p><em>(Vedi <a href="/lezioni_informatica/LICENSE.html">LICENSE.md</a> per i dettagli)</em></p>
+        
+        <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+            This site is open source. <a href="https://github.com/swar-sudo/lezioni_informatica/edit/master/informatica/esercizio_bancomat.html">Improve this page</a>.
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+</body>
+</html>
