@@ -15,6 +15,9 @@ Adatto a studenti e docenti di istituti tecnici (ITIS, ITTS).
 - **TPSIT**
     - [Web Service SOAP con Eclipse](https://swar-sudo.github.io/lezioni_informatica/tpsit/web_service_soap_eclipse_1.html)
 
+- **Sistemi e Reti**
+    - [Esercizio HTTP e DNS - Packet Tracer](https://swar-sudo.github.io/lezioni_informatica/ser/es_http(s)_dns.html)
+
 ## 👨‍🏫 Autore
 **Matteo Patisso**  
 - Docente di Laboratorio Informatica
