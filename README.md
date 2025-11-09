@@ -12,6 +12,8 @@ Raccolta completa di lezioni, esercizi e risorse per:
 Adatto a studenti e docenti di istituti tecnici (ITIS, ITTS).
 
 ## Indice
+- **Informatica**
+    - [Esercizio Bancomat - Programmazione in C](https://swar-sudo.github.io/lezioni_informatica/informatica/c/es_bancomat.html)
 - **TPSIT**
     - [Web Service SOAP con Eclipse](https://swar-sudo.github.io/lezioni_informatica/tpsit/web_service_soap_eclipse_1.html)
 
