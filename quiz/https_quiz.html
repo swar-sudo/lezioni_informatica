@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Analisi Traffico HTTPS con Wireshark</title>
+    <style>
+        /* CSS per lo stile del quiz */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .question-box {
+            background: #e9f0ff;
+            border: 1px solid #cceeff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #0056b3;
+        }
+
+        .option-label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .option-label:hover {
+            background: #d9e2f4;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none; /* Nascondi per default */
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 30px;
+        }
+
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Analisi Traffico HTTPS - Quiz Wireshark</h1>
+
+    <form id="quiz-form">
+
+        <div class="question-box" data-correct="q1-b">
+            <div class="question-title">1. Qual è lo scopo primario dell'Handshake TCP a tre vie (SYN, SYN/ACK, ACK)? (Activity 3)</div>
+            <label class="option-label"><input type="radio" name="q1" value="q1-a"> a) Stabilire la chiave di sessione TLS. </label>
+            <label class="option-label"><input type="radio" name="q1" value="q1-b"> b) Stabilire una connessione bidirezionale affidabile tra client e server prima dell'handshake TLS. </label>
+            <label class="option-label"><input type="radio" name="q1" value="q1-c"> c) Cifrare i dati del pacchetto. </label>
+            <div class="feedback"></div>
+        </div>
+        
+        <div class="question-box" data-correct="q2-a">
+            <div class="question-title">2. Quale filtro Wireshark è corretto per visualizzare esclusivamente il traffico TLS su una porta standard? (Activity 2)</div>
+            <label class="option-label"><input type="radio" name="q2" value="q2-a"> a) tls && tcp.port==443 </label>
+            <label class="option-label"><input type="radio" name="q2" value="q2-b"> b) http || tcp.port==80 </label>
+            <label class="option-label"><input type="radio" name="q2" value="q2-c"> c) ip.addr == 443 </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q3-c">
+            <div class="question-title">3. Quale informazione essenziale viene inviata dal client al server nel messaggio "Client Hello" di TLS 1.3? (Activity 4)</div>
+            <label class="option-label"><input type="radio" name="q3" value="q3-a"> a) Il Certificato del Server e la chiave di sessione. </label>
+            <label class="option-label"><input type="radio" name="q3" value="q3-b"> b) Il messaggio Change Cipher Spec. </label>
+            <label class="option-label"><input type="radio" name="q3" value="q3-c"> c) L'elenco delle Cipher Suites supportate e l'estensione Server Name Indication (SNI). </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q4-b">
+            <div class="question-title">4. In TLS 1.3, quali messaggi di handshake appaiono cifrati in Wireshark subito dopo il "Server Hello"? (Activity 6)</div>
+            <label class="option-label"><input type="radio" name="q4" value="q4-a"> a) Solo Client Hello e Server Hello. </label>
+            <label class="option-label"><input type="radio" name="q4" value="q4-b"> b) Encrypted Extensions, Certificate, Certificate Verify e Finished. </label>
+            <label class="option-label"><input type="radio" name="q4" value="q4-c"> c) Solo l'Application Data. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q5-a">
+            <div class="question-title">5. Qual è lo scopo del "New Session Ticket" in TLS 1.3, e quale campo chiave contiene? (Activity 8)</div>
+            <label class="option-label"><input type="radio" name="q5" value="q5-a"> a) Permettere la ripresa veloce della sessione (session resumption) e contiene l'identità del ticket (PSK) crittografata. </label>
+            <label class="option-label"><input type="radio" name="q5" value="q5-b"> b) Inviare il certificato del server in chiaro per una verifica rapida. </label>
+            <label class="option-label"><input type="radio" name="q5" value="q5-c"> c) Informare il client della durata massima dell'handshake TCP. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q6-a">
+            <div class="question-title">6. Analizzando i dettagli del pacchetto TCP di una connessione HTTPS, quale porta di destinazione (Destination Port) si osserva tipicamente? (Activity 3)</div>
+            <label class="option-label"><input type="radio" name="q6" value="q6-a"> a) 443 </label>
+            <label class="option-label"><input type="radio" name="q6" value="q6-b"> b) 80 </label>
+            <label class="option-label"><input type="radio" name="q6" value="q6-c"> c) Una porta dinamica superiore a 1024. </label>
+            <div class="feedback"></div>
+        </div>
+        
+        <div class="question-box" data-correct="q7-c">
+            <div class="question-title">7. Qual è lo scopo del pacchetto TCP ACK che segue immediatamente il "Client Hello" in Wireshark? (Activity 4)</div>
+            <label class="option-label"><input type="radio" name="q7" value="q7-a"> a) Contiene la chiave di cifratura scelta dal server. </label>
+            <label class="option-label"><input type="radio" name="q7" value="q7-b"> b) Rappresenta il messaggio Server Hello. </label>
+            <label class="option-label"><input type="radio" name="q7" value="q7-c"> c) Conferma la ricezione del pacchetto Client Hello da parte del server. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q8-b">
+            <div class="question-title">8. Qual è una delle informazioni cruciali che il server invia nel messaggio "Server Hello" in risposta al client? (Activity 5)</div>
+            <label class="option-label"><input type="radio" name="q8" value="q8-a"> a) L'indirizzo MAC di destinazione. </label>
+            <label class="option-label"><input type="radio" name="q8" value="q8-b"> b) La Cipher Suite scelta per la sessione. </label>
+            <label class="option-label"><input type="radio" name="q8" value="q8-c"> c) La durata del New Session Ticket. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q9-c">
+            <div class="question-title">9. Osservando il traffico TLS etichettato "Application Data" in Wireshark, perché il payload HTTP è illeggibile? (Activity 9)</div>
+            <label class="option-label"><input type="radio" name="q9" value="q9-a"> a) Perché si è utilizzato il filtro sbagliato. </label>
+            <label class="option-label"><input type="radio" name="q9" value="q9-b"> b) Perché è in formato JSON. </label>
+            <label class="option-label"><input type="radio" name="q9" value="q9-c"> c) Perché il traffico applicativo è cifrato con le chiavi di sessione TLS. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q10-a">
+            <div class="question-title">10. A cosa serve l'estensione SNI (Server Name Indication) inviata nel Client Hello? (Activity 4)</div>
+            <label class="option-label"><input type="radio" name="q10" value="q10-a"> a) Permette al server di sapere a quale specifico nome di dominio si sta connettendo il client (utile per server che ospitano più siti HTTPS). </label>
+            <label class="option-label"><input type="radio" name="q10" value="q10-b"> b) Indica la versione di TLS che il server DEVE utilizzare. </label>
+            <label class="option-label"><input type="radio" name="q10" value="q10-c"> c) Contiene la chiave pubblica del client. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <div class="question-box" data-correct="q11-b">
+            <div class="question-title">11. Qual è la differenza fondamentale tra HTTP e HTTPS?</div>
+            <label class="option-label"><input type="radio" name="q11" value="q11-a"> a) HTTP usa TCP sulla porta 80, HTTPS usa UDP sulla porta 443. </label>
+            <label class="option-label"><input type="radio" name="q11" value="q11-b"> b) HTTPS aggiunge uno strato di sicurezza (TLS/SSL) per la crittografia, autenticazione e integrità, operando sulla porta 443. </label>
+            <label class="option-label"><input type="radio" name="q11" value="q11-c"> c) HTTP è crittografato, ma HTTPS è più veloce. </label>
+            <div class="feedback"></div>
+        </div>
+
+        <button type="button" onclick="checkQuiz()">Verifica Risposte</button>
+
+        <div id="results" style="display: none;"></div>
+    </form>
+</div>
+
+<script>
+    function checkQuiz() {
+        const form = document.getElementById('quiz-form');
+        const questionBoxes = document.querySelectorAll('.question-box');
+        let score = 0;
+        let total = 0;
+
+        questionBoxes.forEach(box => {
+            total++;
+            const correctValue = box.getAttribute('data-correct');
+            const selectedOption = box.querySelector(`input[name="${box.querySelector('input').name}"]:checked`);
+            const feedbackDiv = box.querySelector('.feedback');
+            
+            feedbackDiv.style.display = 'block';
+            
+            // Rimuovi le classi precedenti
+            feedbackDiv.classList.remove('correct', 'incorrect');
+
+            if (selectedOption && selectedOption.value === correctValue) {
+                score++;
+                feedbackDiv.textContent = 'Corretto! ✅';
+                feedbackDiv.classList.add('correct');
+            } else {
+                // Trova l'etichetta dell'opzione corretta per la visualizzazione
+                const correctLabel = box.querySelector(`input[value="${correctValue}"]`).parentNode.textContent.trim();
+                feedbackDiv.textContent = `Sbagliato. ❌ La risposta corretta era: ${correctLabel}`;
+                feedbackDiv.classList.add('incorrect');
+            }
+        });
+
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.textContent = `Hai risposto correttamente a ${score} domande su ${total}!`;
+        resultsDiv.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
