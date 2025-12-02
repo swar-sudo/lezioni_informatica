@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-TYPE // Esercizi di Digito-Simulazione</title>
+    <style>
+        /* CSS per lo stile Cyberpunk anni '80 */
+        :root {
+            --color-neon-green: #00ff66;
+            --color-dark-bg: #1a1a2e;
+            --color-accent-blue: #0f3460;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        @font-face {
+            font-family: 'Fira Code';
+            font-style: normal;
+            font-weight: 400;
+            /* Per un ambiente reale, si dovrebbe linkare un font cyberpunk/mono come Fira Code o VT323 */
+            /* Per questo esempio, usiamo un font generico in attesa del link */
+            src: local('Courier New'), local('Monospace');
+        }
+
+        body {
+            font-family: var(--font-mono);
+            background-color: var(--color-dark-bg);
+            color: var(--color-neon-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            border: 2px solid var(--color-neon-green);
+            box-shadow: 0 0 15px var(--color-neon-green), inset 0 0 10px var(--color-accent-blue);
+            padding: 30px;
+            background-color: rgba(10, 10, 20, 0.8);
+            animation: glitch-shadow 1s infinite alternate;
+        }
+
+        @keyframes glitch-shadow {
+            0% { box-shadow: 0 0 15px var(--color-neon-green), inset 0 0 10px var(--color-accent-blue); }
+            100% { box-shadow: 1px 1px 16px var(--color-neon-green), inset -1px -1px 12px var(--color-accent-blue); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff00ff; /* Viola neon */
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            border-bottom: 2px solid var(--color-neon-green);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--color-neon-green);
+        }
+
+        .status-item {
+            font-size: 1.1em;
+        }
+
+        #timer {
+            color: #ffff00; /* Giallo neon */
+        }
+
+        #frase-display {
+            font-size: 1.5em;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--color-accent-blue);
+            margin-bottom: 20px;
+            min-height: 60px;
+            white-space: pre-wrap; /* Mantiene la formattazione e le interruzioni di riga */
+        }
+
+        /* Stili per la digitazione */
+        .corretto {
+            color: #ff00ff; /* Viola */
+        }
+
+        .sbagliato {
+            color: #ff0000; /* Rosso neon */
+            background-color: rgba(255, 0, 0, 0.3);
+            border-bottom: 2px solid #ff0000;
+        }
+
+        .attuale {
+            border-bottom: 3px solid #ffff00; /* Giallo neon per il carattere corrente */
+        }
+
+        #input-area {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-family: var(--font-mono);
+            background-color: var(--color-dark-bg);
+            color: var(--color-neon-green);
+            border: 3px solid var(--color-neon-green);
+            box-shadow: 0 0 10px var(--color-neon-green);
+            outline: none;
+            caret-color: #ffff00;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #ff00ff;
+            color: var(--color-dark-bg);
+            border: 2px solid #ff00ff;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: all 0.2s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: var(--color-dark-bg);
+            color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #risultato-finale {
+            text-align: center;
+            font-size: 1.8em;
+            color: #ffff00;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>// CYBER-TYPE V3 //</h1>
+
+        <div class="status-bar">
+            <div class="status-item">Esercizio: <span id="current-exercise">1</span>/25</div>
+            <div class="status-item">Errori Frase: <span id="current-errors">0</span>/2</div>
+            <div class="status-item">Tempo Rimanente: <span id="timer">20:00</span></div>
+        </div>
+
+        <div id="frase-display">Inizia a digitare per avviare il simulatore.</div>
+
+        <input type="text" id="input-area" placeholder=">>> INSERISCI SEQUENZA QUI <<<" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+        <button id="reset-button">RESET SISTEMA</button>
+        <div id="risultato-finale" class="hidden"></div>
+    </div>
+
+    <script>
+        // Array di frasi con difficoltà crescente e caratteri della tastiera italiana
+        const frasi = [
+            // Livello 1: Lettere Minuscole (Base)
+            "la matrice è un sistema di percezione falsato.",
+            "programmare è l'arte di dire a un computer cosa fare.",
+            "un bit è l'unità fondamentale di informazione digitale.",
+            "la simulazione sta per terminare.",
+            "i dati scorrono velocemente sul terminale.",
+
+            // Livello 2: Spazi, Maiuscole (Shift)
+            "Il Neo-Tokyo è una città di luci al neon e segreti digitali.",
+            "L'hacker Silenzioso ha violato il mainframe della Corporate.",
+            "Siamo Tutti Connessi alla Rete Globale, ma non Liberi.",
+            "La Verità è spesso nascosta Dietro un Firewall Potente.",
+            "Accedi al protocollo Alpha-Beta-Gamma e disattiva la Sorveglianza.",
+
+            // Livello 3: Numeri, Punteggiatura Base (1234567890 . , ; :)
+            "Il 2049 non è come ce lo aspettavamo: 3 mega-corporazioni dominano; il 90% vive sotto la soglia.",
+            "Protocollo 7.5.3 attivato: carica i dati 800.231.045.",
+            "Attenzione! La chiave è 1984 e l'accesso è limitato: 2 tentativi rimasti.",
+            "Registrazione completata alle 15:45:01; il sistema è operativo al 99%.",
+            "Scannerizza il codice 007 prima che il timer raggiunga 0.",
+
+            // Livello 4: Simboli base ( - _ ' ? ! £ $ % & @ / \ = )
+            "La password è 'Neo-Blade!@2077'. È cruciale non sbagliare.",
+            "Il file `Rapporto-Segreto_007.dat` contiene £1.500.000 in crediti virtuali.",
+            "Chi ha detto 'Il futuro non è scritto?' Io credo che sia pre-codificato.",
+            "Il prezzo è: $100.000 per l'aggiornamento; % di sconto non applicabile.",
+            "Errore 404: Connessione fallita. Controlla il cavo `/dev/ttyS0` = OK?",
+
+            // Livello 5: Simboli avanzati e operatori ( + * ( ) [ ] { } < > | ^ ~ # § € ° ç à è ì ò ù )
+            "Il calcolo è: (5 * 2) + 10 = 20; la formula non è corretta [vedi allegato].",
+            "Compila il modulo con i dati personali: Nome: {utente} | Codice: ^A3D~9#.",
+            "Attivare il campo di forza: Forza < 500 N; Energia > 200 €; §6.5.",
+            "L'ora è 04°20' PM; Cerca il simbolo `ç` o la lettera `à` nel testo.",
+            "Il tuo punteggio è (3 * PuntiFrase) + (100 - TempoImpiegato); non {reset} l'algoritmo."
+        ];
+
+        let esercizioCorrente = 0;
+        let erroriFraseCorrenti = 0;
+        const maxErroriPerFrase = 2;
+        const maxTimeSeconds = 20 * 60; // 20 minuti in secondi
+        let tempoRimanente = maxTimeSeconds;
+        let timerInterval;
+        let giocoInCorso = false;
+
+        const display = document.getElementById('frase-display');
+        const inputArea = document.getElementById('input-area');
+        const currentExerciseSpan = document.getElementById('current-exercise');
+        const currentErrorsSpan = document.getElementById('current-errors');
+        const timerSpan = document.getElementById('timer');
+        const risultatoFinaleDiv = document.getElementById('risultato-finale');
+        const resetButton = document.getElementById('reset-button');
+
+        // --- Funzioni di Controllo Gioco ---
+
+        function aggiornaDisplay() {
+            const frase = frasi[esercizioCorrente];
+            display.innerHTML = '';
+            for (let i = 0; i < frase.length; i++) {
+                const span = document.createElement('span');
+                span.textContent = frase[i];
+                display.appendChild(span);
+            }
+            // Imposta il primo carattere come corrente
+            if (display.firstChild) {
+                display.firstChild.classList.add('attuale');
+            }
+            currentExerciseSpan.textContent = esercizioCorrente + 1;
+            currentErrorsSpan.textContent = erroriFraseCorrenti;
+        }
+
+        function gestisciInput(event) {
+            if (!giocoInCorso) {
+                avviaTimer();
+                giocoInCorso = true;
+            }
+
+            const inputCarattere = inputArea.value[inputArea.value.length - 1];
+            const fraseCorrente = frasi[esercizioCorrente];
+            const indiceCorrente = inputArea.value.length - 1;
+            const caratteriDisplay = display.getElementsByTagName('span');
+
+            // Logica di confronto
+            if (indiceCorrente < caratteriDisplay.length) {
+                const carattereAtteso = fraseCorrente[indiceCorrente];
+                const spanAttuale = caratteriDisplay[indiceCorrente];
+
+                // Rimuovi la classe 'attuale' dal precedente e aggiungila al successivo (se esiste)
+                if (indiceCorrente > 0) {
+                    caratteriDisplay[indiceCorrente - 1].classList.remove('attuale');
+                }
+
+                if (inputCarattere === carattereAtteso) {
+                    spanAttuale.classList.remove('sbagliato');
+                    spanAttuale.classList.add('corretto');
+                } else {
+                    if (!spanAttuale.classList.contains('sbagliato')) {
+                        erroriFraseCorrenti++;
+                        currentErrorsSpan.textContent = erroriFraseCorrenti;
+
+                        if (erroriFraseCorrenti > maxErroriPerFrase) {
+                            inputArea.disabled = true;
+                            mostraRisultato("ERRORE CRITICO. Tentativo fallito. Sistema in RESET.", false);
+                            setTimeout(resetGioco, 3000); // Ritarda il reset per mostrare il messaggio
+                            return;
+                        }
+                    }
+                    spanAttuale.classList.remove('corretto');
+                    spanAttuale.classList.add('sbagliato');
+                }
+
+                // Sposta il cursore visivo sul carattere successivo
+                if (indiceCorrente + 1 < caratteriDisplay.length) {
+                    caratteriDisplay[indiceCorrente + 1].classList.add('attuale');
+                } else if (indiceCorrente + 1 === caratteriDisplay.length) {
+                    // L'ultima lettera è stata digitata
+                    spanAttuale.classList.remove('attuale');
+                }
+            }
+
+
+            // --- Controllo completamento frase ---
+            if (inputArea.value.length === fraseCorrente.length) {
+                if (inputArea.value === fraseCorrente) {
+                    esercizioCorrente++;
+                    erroriFraseCorrenti = 0;
+                    inputArea.value = '';
+
+                    if (esercizioCorrente < frasi.length) {
+                        aggiornaDisplay();
+                    } else {
+                        fermaTimer();
+                        inputArea.disabled = true;
+                        mostraRisultato("SIMULAZIONE COMPLETATA! Congratulazioni, Operatore.", true);
+                    }
+                } else {
+                    // Se la lunghezza è uguale ma il testo non corrisponde, non fare nulla (l'utente deve correggere)
+                    // L'ultima lettera errata sarà già stata marcata come 'sbagliato'
+                }
+            } else if (inputArea.value.length > fraseCorrente.length) {
+                // Previene l'input di caratteri extra
+                inputArea.value = inputArea.value.substring(0, fraseCorrente.length);
+            }
+        }
+
+        // Blocca la digitazione di caratteri che vengono eliminati (es. backspace) per allineare input e display
+        function gestisciBackSpace(event) {
+            if (event.key === 'Backspace') {
+                const fraseCorrente = frasi[esercizioCorrente];
+                const caratteriDisplay = display.getElementsByTagName('span');
+                const lunghezzaInput = inputArea.value.length;
+                
+                // Rimuove gli stili dall'ultimo carattere
+                if (lunghezzaInput < caratteriDisplay.length) {
+                    // Sposta l'attuale all'indietro
+                    caratteriDisplay[lunghezzaInput].classList.remove('attuale');
+                }
+
+                if (lunghezzaInput > 0) {
+                    const spanPrecedente = caratteriDisplay[lunghezzaInput - 1];
+                    spanPrecedente.classList.remove('corretto', 'sbagliato');
+                    spanPrecedente.classList.add('attuale');
+                }
+            }
+        }
+        
+        // --- Gestione del Timer ---
+
+        function avviaTimer() {
+            if (timerInterval) return; // Evita di avviare più timer
+
+            timerInterval = setInterval(() => {
+                tempoRimanente--;
+                const minuti = Math.floor(tempoRimanente / 60);
+                const secondi = tempoRimanente % 60;
+                timerSpan.textContent = `${String(minuti).padStart(2, '0')}:${String(secondi).padStart(2, '0')}`;
+
+                if (tempoRimanente <= 0) {
+                    fermaTimer();
+                    inputArea.disabled = true;
+                    mostraRisultato("TEMPO SCADUTO. Sistema bloccato. RESET.", false);
+                }
+            }, 1000);
+        }
+
+        function fermaTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            giocoInCorso = false;
+        }
+
+        // --- Altre Funzioni ---
+
+        function mostraRisultato(messaggio, successo) {
+            risultatoFinaleDiv.textContent = messaggio;
+            risultatoFinaleDiv.style.color = successo ? '#00ff66' : '#ff0000';
+            risultatoFinaleDiv.classList.remove('hidden');
+            display.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            resetButton.style.display = 'block';
+        }
+
+        function nascondiRisultato() {
+            risultatoFinaleDiv.classList.add('hidden');
+            display.classList.remove('hidden');
+            inputArea.classList.remove('hidden');
+        }
+
+        function resetGioco() {
+            fermaTimer();
+            esercizioCorrente = 0;
+            erroriFraseCorrenti = 0;
+            tempoRimanente = maxTimeSeconds;
+            inputArea.value = '';
+            inputArea.disabled = false;
+            giocoInCorso = false;
+            
+            const minuti = Math.floor(maxTimeSeconds / 60);
+            const secondi = maxTimeSeconds % 60;
+            timerSpan.textContent = `${String(minuti).padStart(2, '0')}:${String(secondi).padStart(2, '0')}`;
+
+            nascondiRisultato();
+            aggiornaDisplay();
+            inputArea.focus();
+        }
+
+        // --- Blocca Copia-Incolla e Funzioni Speciali ---
+
+        inputArea.addEventListener('paste', (e) => {
+            e.preventDefault(); // Impedisce l'azione predefinita di incollare
+            alert("ATTENZIONE! Operazione di copia-incolla disabilitata per simulazione. Digitare manualmente.");
+        });
+
+        inputArea.addEventListener('copy', (e) => {
+            e.preventDefault();
+        });
+        
+        inputArea.addEventListener('cut', (e) => {
+            e.preventDefault();
+        });
+
+        // Event Listeners
+        inputArea.addEventListener('input', gestisciInput);
+        inputArea.addEventListener('keydown', gestisciBackSpace);
+        resetButton.addEventListener('click', resetGioco);
+
+        // Inizializzazione
+        window.onload = resetGioco;
+
+    </script>
+</body>
+</html>
