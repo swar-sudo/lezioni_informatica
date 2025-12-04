@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it-IT">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Definizioni DTD - Guida di Riferimento Rapida</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        background-color: #ffffff; /* Sfondo bianco forzato */
+        color: #24292e; /* Testo scuro */
+        line-height: 1.6;
+        padding: 45px;
+        margin: 0 auto;
+        max-width: 980px;
+        box-sizing: border-box;
+      }
+      h1, h2, h3 {
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 0.3em;
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid #eaecef;
+        margin: 15px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+        display: block;
+        overflow-x: auto;
+      }
+      th, td {
+        border: 1px solid #dfe2e5;
+        padding: 8px 13px;
+        text-align: left;
+      }
+      th {
+        background-color: #f6f8fa; /* Sfondo chiaro per l'intestazione */
+        font-weight: 600;
+      }
+      code {
+        background-color: #f3f4f6; /* Sfondo chiaro per il codice inline */
+        border-radius: 3px;
+        padding: .2em .4em;
+        font-family: monospace;
+        font-size: 85%;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      /* Adattamento per dispositivi piccoli */
+      @media (max-width: 767px) {
+        body {
+          padding: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+            
+        <h1>📝 Costrutti DTD (Document Type Definition)</h1>
+        <p><em>Guida di riferimento rapida per gli elementi e attributi fondamentali per la validazione XML.</em></p>
+        
+        <hr />
+        
+        <h2 id="obiettivo">🎯 Obiettivo</h2>
+        <p>Comprendere il significato e l'utilizzo dei termini chiave nel DTD per definire la struttura e i vincoli di contenuto dei documenti XML.</p>
+
+        <h2 id="indice">Indice</h2>
+        <ul>
+            <li><a href="#modelli-di-contenuto-elementi">Modelli di Contenuto degli Elementi</a></li>
+            <li><a href="#tipi-di-dati-attributi">Tipi di Dati degli Attributi</a></li>
+            <li><a href="#dichiarazioni-di-default-attributi">Dichiarazioni di Default degli Attributi</a></li>
+            <li><a href="#altre-definizioni">Altre Definizioni Utili</a></li>
+        </ul>
+        
+        <hr />
+
+        <h2 id="modelli-di-contenuto-elementi">📦 Modelli di Contenuto degli Elementi</h2>
+        <p>Questi termini vengono usati all'interno della dichiarazione <code>&lt;!ELEMENT&gt;</code> e specificano cosa può contenere un tag XML.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Costrutto</th>
+                    <th>Significato</th>
+                    <th>Uso</th>
+                    <th>Esempio DTD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>#PCDATA</strong></td>
+                    <td>Parsed Character Data (Dati Carattere Analizzati)</td>
+                    <td>L'elemento contiene **solo testo semplice** che il parser XML elabora.</td>
+                    <td><code>&lt;!ELEMENT titolo (#PCDATA)&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>EMPTY</strong></td>
+                    <td>Elemento Vuoto</td>
+                    <td>L'elemento **non può contenere nulla**, né testo né altri elementi. Le informazioni sono trasportate solo tramite attributi.</td>
+                    <td><code>&lt;!ELEMENT immagine EMPTY&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>ANY</strong></td>
+                    <td>Qualsiasi Contenuto</td>
+                    <td>L'elemento può contenere **qualsiasi cosa** (testo o qualsiasi altro elemento dichiarato) in qualsiasi ordine. Da usare con cautela.</td>
+                    <td><code>&lt;!ELEMENT sezione ANY&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Sequenza/Gruppo</strong></td>
+                    <td>Ordine Stretto</td>
+                    <td>Gli elementi figli devono apparire nell'ordine preciso specificato (separati da virgola <code>,</code>).</td>
+                    <td><code>&lt;!ELEMENT libro (titolo, autore, capitolo)&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Alternativa</strong></td>
+                    <td>Una Scelta</td>
+                    <td>L'elemento deve contenere **uno solo** dei sottoelementi elencati (separati da barra verticale <code>|</code>).</td>
+                    <td><code>&lt;!ELEMENT media (immagine | video)&gt;</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <h2 id="tipi-di-dati-attributi">🔑 Tipi di Dati degli Attributi</h2>
+        <p>Questi termini vengono usati all'interno della dichiarazione <code>&lt;!ATTLIST&gt;</code> e definiscono il tipo di valore accettato da un attributo.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Costrutto</th>
+                    <th>Significato</th>
+                    <th>Uso</th>
+                    <th>Esempio DTD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CDATA</strong></td>
+                    <td>Character Data</td>
+                    <td>L'attributo accetta **qualsiasi stringa di caratteri** valida. È il tipo più generico.</td>
+                    <td><code>&lt;!ATTLIST prodotto colore CDATA #IMPLIED&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>ID</strong></td>
+                    <td>Identificatore Unico</td>
+                    <td>Il valore dell'attributo deve essere **unico** nell'intero documento XML, fungendo da "chiave primaria" per l'elemento.</td>
+                    <td><code>&lt;!ATTLIST capitolo id ID #REQUIRED&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>IDREF / IDREFS</strong></td>
+                    <td>Riferimento a ID</td>
+                    <td>Il valore deve corrispondere a un valore **ID** esistente in un altro elemento (usato per collegamenti interni). <code>IDREFS</code> accetta una lista di ID.</td>
+                    <td><code>&lt;!ATTLIST nota riferimento IDREF #REQUIRED&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>(Valori Enumerati)</strong></td>
+                    <td>Lista di Valori Predefiniti</td>
+                    <td>L'attributo può accettare **solo uno dei valori** specificati tra parentesi.</td>
+                    <td><code>&lt;!ATTLIST stato (attivo|inattivo) #REQUIRED&gt;</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr />
+
+        <h2 id="dichiarazioni-di-default-attributi">✅ Dichiarazioni di Default degli Attributi</h2>
+        <p>Questi termini specificano la presenza (o meno) e il valore predefinito di un attributo, sempre all'interno della dichiarazione <code>&lt;!ATTLIST&gt;</code>.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Costrutto</th>
+                    <th>Significato</th>
+                    <th>Uso</th>
+                    <th>Esempio DTD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>#REQUIRED</strong></td>
+                    <td>Obbligatorio</td>
+                    <td>L'attributo **deve** essere specificato nell'elemento XML.</td>
+                    <td><code>&lt;!ATTLIST articolo titolo CDATA #REQUIRED&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>#IMPLIED</strong></td>
+                    <td>Implicito/Opzionale</td>
+                    <td>L'attributo è **opzionale** e può essere omesso nel documento XML.</td>
+                    <td><code>&lt;!ATTLIST articolo data CDATA #IMPLIED&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>#FIXED "valore"</strong></td>
+                    <td>Valore Fisso</td>
+                    <td>L'attributo **deve avere esattamente il valore** specificato. Se omesso, il parser lo inserirà con quel valore.</td>
+                    <td><code>&lt;!ATTLIST documento versione CDATA #FIXED "1.0"&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><strong>"valore di default"</strong></td>
+                    <td>Valore Predefinito</td>
+                    <td>Se l'attributo è omesso, il parser gli assegna il valore specificato, ma l'utente può sovrascriverlo.</td>
+                    <td><code>&lt;!ATTLIST utente stato (online|offline) "offline"&gt;</code></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <hr />
+        
+        <h2 id="altre-definizioni">➕ Altre Definizioni Utili</h2>
+        <p>I caratteri speciali (quantificatori) utilizzati per definire la molteplicità degli elementi in una sequenza:</p>
+
+        <ul>
+            <li>**<code>+</code> (Più):** L'elemento deve apparire **una o più** volte. (Es: <code>(capitolo+)</code>)</li>
+            <li>**<code>*</code> (Asterisco):** L'elemento può apparire **zero o più** volte. (Es: <code>(nota*)</code>)</li>
+            <li>**<code>?</code> (Punto interrogativo):** L'elemento può apparire **zero o una sola** volta. (Es: <code>(prefazione?)</code>)</li>
+        </ul>
+        
+        <hr />
+
+        <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+            <p>“La validazione è la chiave per la condivisibilità dei dati.”</p>
+            <img src="https://img.shields.io/badge/Didattica-DTD_XML-blue.svg" alt="Didattica DTD XML" />
+        </div>
+        
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>
