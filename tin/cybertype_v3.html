@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER-TYPE // V2.7 Reliability Fix</title>
+    <title>CYBER-TYPE // V2.8 Ultimate</title>
     <style>
         /* --- STILI CYBERPUNK --- */
         :root {
@@ -93,7 +93,7 @@
             min-height: 80px;
             white-space: pre-wrap;
             line-height: 1.5;
-            cursor: text; /* Cursore testo per indicare che è l'area attiva */
+            cursor: text;
         }
 
         .corretto { color: var(--color-neon-violet); text-shadow: 0 0 5px var(--color-neon-violet); }
@@ -112,7 +112,6 @@
         @keyframes blink { 50% { border-color: transparent; } }
 
         /* --- INPUT NASCOSTO MA ATTIVO --- */
-        /* Opacità 0 ma dimensioni 1px per garantire il focus su tutti i browser */
         #input-area {
             position: absolute;
             opacity: 0;
@@ -157,17 +156,40 @@
         #risultato-finale {
             text-align: center;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
-        .result-title { font-size: 2em; margin-bottom: 20px; }
-        .stat-box { 
-            display: flex; 
-            justify-content: space-around; 
-            margin: 30px 0; 
+        .result-title { font-size: 2em; margin-bottom: 15px; }
+
+        .result-hacker-img {
+            max-width: 200px;
+            border: 2px solid var(--color-neon-green);
+            box-shadow: 0 0 15px var(--color-neon-green);
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .stat-grid { 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
             border-top: 1px dashed var(--color-neon-green);
             padding-top: 20px;
+            margin-bottom: 20px;
         }
-        .big-stat { font-size: 3em; color: var(--color-neon-yellow); display: block;}
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label { font-size: 0.9em; color: #aaa; text-transform: uppercase; }
+        .stat-val { font-size: 1.8em; color: var(--color-neon-yellow); font-weight: bold; }
+        .stat-val-main { font-size: 2.5em; color: var(--color-neon-violet); }
 
         button {
             background-color: var(--color-neon-violet);
@@ -179,12 +201,19 @@
             cursor: pointer;
             box-shadow: 0 0 15px var(--color-neon-violet);
             transition: 0.2s;
-            margin-top: 20px;
+            margin-top: 10px;
             width: 100%;
         }
         button:hover {
             background-color: #d100d1;
             box-shadow: 0 0 25px var(--color-neon-violet);
+        }
+        
+        .press-enter-hint {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: var(--color-neon-green);
+            animation: blink 1s infinite;
         }
 
         .hidden { display: none !important; }
@@ -201,7 +230,7 @@
 <body>
 
     <div class="container" id="game-container">
-        <h1>// CYBER-TYPE V2.7 //</h1>
+        <h1>// CYBER-TYPE V2.8 //</h1>
 
         <div class="status-bar" id="status-bar">
             <div class="status-item">Livello: <span id="ui-level">1</span>/25</div>
@@ -228,17 +257,38 @@
 
         <div id="risultato-finale" class="hidden">
             <div id="res-msg" class="result-title"></div>
-            <div class="stat-box">
-                <div>
-                    <span>WPM FINALE</span>
-                    <span id="res-wpm" class="big-stat">0</span>
+            
+            <img src="https://i.pinimg.com/474x/b2/c1/da/b2c1dab9a5899df7f80baef8804470bb.jpg" alt="Hacker Cat" class="result-hacker-img">
+
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <span class="stat-label">WPM</span>
+                    <span id="res-wpm" class="stat-val stat-val-main">0</span>
                 </div>
-                <div>
-                    <span>ACCURATEZZA</span>
-                    <span id="res-acc" class="big-stat">0%</span>
+                <div class="stat-item">
+                    <span class="stat-label">Accuratezza</span>
+                    <span id="res-acc" class="stat-val stat-val-main">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Consistenza</span>
+                    <span id="res-cons" class="stat-val">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">RAW</span>
+                    <span id="res-raw" class="stat-val">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Tempo</span>
+                    <span id="res-time" class="stat-val">0s</span>
+                </div>
+                 <div class="stat-item">
+                    <span class="stat-label">Livello Max</span>
+                    <span id="res-lvl" class="stat-val">1</span>
                 </div>
             </div>
+
             <button id="btn-restart">RIAVVIA DA LIVELLO 1</button>
+            <div class="press-enter-hint">[ PREMI INVIO PER RIAVVIARE ]</div>
         </div>
     </div>
 
@@ -285,17 +335,18 @@
             isRunning: false,
             isLocked: false,
             startTime: 0,
+            endTime: 0,
             maxLevelReached: 1,
-            maxWPM: 0
+            maxWPM: 0,
+            totalKeystrokes: 0 // Per calcolo RAW
         };
 
         let timerInterval = null;
-        let els = {}; // Oggetto DOM inizializzato dopo
+        let els = {};
 
         // --- CORE FUNCTIONS ---
 
         function initGame() {
-            // Inizializza riferimenti DOM
             els = {
                 display: document.getElementById('frase-display'),
                 input: document.getElementById('input-area'),
@@ -312,32 +363,42 @@
                 resMsg: document.getElementById('res-msg'),
                 resWPM: document.getElementById('res-wpm'),
                 resACC: document.getElementById('res-acc'),
+                resCONS: document.getElementById('res-cons'),
+                resRAW: document.getElementById('res-raw'),
+                resTIME: document.getElementById('res-time'),
+                resLVL: document.getElementById('res-lvl'),
                 btnReset: document.getElementById('btn-reset'),
                 btnRestart: document.getElementById('btn-restart'),
                 container: document.getElementById('game-container')
             };
 
-            // Setup Listeners
             setupListeners();
             resetSession(true);
         }
 
         function setupListeners() {
-            // Usa l'evento 'input' nativo per la massima compatibilità
-            els.input.addEventListener('input', handleInputEvent);
-            
-            // Gestione Backspace e tasti speciali via keydown
-            els.input.addEventListener('keydown', (e) => {
-                if(e.key === 'Backspace') {
-                    e.preventDefault(); // Blocca cancellazione
-                }
+            // Blocca incolla
+            els.input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                alert("COPIA/INCOLLA NON RILEVATO. PROTOCOLLO DISABILITATO.");
             });
 
-            // Focus globale
-            document.addEventListener('click', (e) => {
-                if(e.target.tagName !== 'BUTTON' && !state.isLocked && !els.finalScreen.classList.contains('hidden')) {
-                    // Non fare focus se stiamo cliccando pulsanti o se il gioco è finito
-                } else if (!state.isLocked) {
+            els.input.addEventListener('input', handleInputEvent);
+            
+            // Gestione tasti globali (incluso INVIO per riavvio)
+            document.addEventListener('keydown', (e) => {
+                // Se siamo nella schermata finale e premiamo Invio -> RESET
+                if (!els.finalScreen.classList.contains('hidden') && e.key === 'Enter') {
+                    e.preventDefault();
+                    resetSession(false);
+                    return;
+                }
+
+                if(e.key === 'Backspace') {
+                    e.preventDefault(); 
+                }
+
+                if(e.target.tagName !== 'BUTTON' && !state.isLocked && els.finalScreen.classList.contains('hidden')) {
                     els.input.focus();
                 }
             });
@@ -348,7 +409,6 @@
 
         function handleInputEvent(e) {
             if (state.isLocked) {
-                // Se bloccato, resetta l'input e ignora
                 els.input.value = els.input.value.slice(0, -1); 
                 return;
             }
@@ -359,16 +419,12 @@
                 startTimer();
             }
 
-            // Ottieni l'ultimo carattere inserito
-            const rawValue = els.input.value;
-            // Se l'utente ha incollato o scritto troppo veloce, prendiamo solo l'ultimo char valido per la logica "Fluid"
-            // Ma per semplicità, processiamo l'ultimo char aggiunto rispetto al buffer visuale
-            // Qui usiamo la lunghezza del valore input come indice
-            
-            const charTyped = e.data; // e.data contiene il carattere inserito
-            
-            if (!charTyped) return; // Ignora input non di testo (es. backspace su mobile)
+            const charTyped = e.data;
+            if (!charTyped) return;
 
+            // Incrementa contatore keystrokes per RAW
+            state.totalKeystrokes++;
+            
             processInput(charTyped);
         }
 
@@ -377,6 +433,7 @@
             state.level = 0;
             state.sessionErrors = 0;
             state.levelErrors = 0;
+            state.totalKeystrokes = 0;
             state.timeLeft = MAX_TIME_SEC;
             state.isRunning = false;
             state.isLocked = false;
@@ -409,7 +466,7 @@
             if(els.display.firstChild) els.display.firstChild.classList.add('attuale');
             
             state.levelErrors = 0;
-            els.input.value = ""; // Resetta input fisico
+            els.input.value = "";
             els.input.focus();
             state.isLocked = false;
             
@@ -418,15 +475,14 @@
 
         function processInput(char) {
             const currentPhrase = frasi[state.level];
-            const currentIndex = els.input.value.length - 1; // Indice basato su quanto scritto
+            const currentIndex = els.input.value.length - 1;
             
-            if (currentIndex >= currentPhrase.length) return; // Protezione out of bounds
+            if (currentIndex >= currentPhrase.length) return;
 
             const targetChar = currentPhrase[currentIndex];
             const spans = els.display.querySelectorAll('span');
             const currentSpan = spans[currentIndex];
 
-            // 1. Logica Corretto/Errato
             if (char === targetChar) {
                 currentSpan.classList.add('corretto');
             } else {
@@ -439,10 +495,8 @@
                 if (checkCriticalLimits(currentSpan)) return;
             }
 
-            // 2. Avanzamento Visivo
             currentSpan.classList.remove('attuale');
             
-            // Prossimo carattere
             if (currentIndex + 1 < currentPhrase.length) {
                 spans[currentIndex + 1].classList.add('attuale');
             } else {
@@ -451,20 +505,17 @@
         }
 
         function checkCriticalLimits(spanElement) {
-            // Caso 1: Troppi errori totali (Game Over)
             if (state.sessionErrors >= MAX_ERRORS_SESSION) {
                 state.isLocked = true;
                 setTimeout(() => triggerGameOver("SISTEMA BLOCCATO: TROPPI ERRORI TOTALI"), 500);
                 return true;
             }
 
-            // Caso 2: Troppi errori nel livello (Regressione)
             if (state.levelErrors >= MAX_ERRORS_LEVEL) {
                 state.isLocked = true;
                 setTimeout(triggerRegression, 800);
                 return true;
             }
-
             return false;
         }
 
@@ -474,7 +525,7 @@
             
             els.overlay.innerHTML = `
                 <div>${msg}</div>
-                <img src="${memeUrl}" class="overlay-img" alt="Bernie Sanders Waiting">
+                <img src="${memeUrl}" class="overlay-img" alt="Bernie Meme">
             `;
             
             els.overlay.style.display = 'block';
@@ -496,7 +547,12 @@
                 state.maxLevelReached = state.level + 1;
                 updateRecords();
             }
-            calculateWPM();
+            // Aggiorna WPM per il record
+            const stats = calculateStats();
+            if (stats.wpm > state.maxWPM) {
+                state.maxWPM = stats.wpm;
+                updateRecords();
+            }
 
             if (state.level >= frasi.length) {
                 triggerGameOver("SIMULAZIONE COMPLETATA CON SUCCESSO!", true);
@@ -508,6 +564,8 @@
 
         function triggerGameOver(msg, success = false) {
             stopTimer();
+            state.endTime = Date.now();
+            
             els.gameArea.classList.add('hidden');
             els.statusBar.classList.add('hidden');
             els.btnReset.classList.add('hidden');
@@ -516,32 +574,53 @@
             els.resMsg.textContent = msg;
             els.resMsg.style.color = success ? 'var(--color-neon-green)' : 'var(--color-neon-red)';
             
-            calculateWPM();
-            els.resWPM.textContent = state.maxWPM;
-            els.resACC.textContent = success ? "100%" : "FAIL";
+            // Calcolo Stats finali
+            const stats = calculateStats();
+
+            els.resWPM.textContent = stats.wpm;
+            els.resACC.textContent = stats.acc + "%";
+            els.resRAW.textContent = stats.raw;
+            els.resCONS.textContent = stats.consistency + "%";
+            els.resTIME.textContent = formatTime(stats.timeSec);
+            els.resLVL.textContent = state.maxLevelReached;
         }
 
-        // --- UTILS & UI ---
-
-        function calculateWPM() {
-            const now = Date.now();
-            const timeMins = (now - state.startTime) / 1000 / 60;
-            if (timeMins <= 0) return;
+        // --- CALCOLO STATISTICHE AVANZATE ---
+        function calculateStats() {
+            const now = state.endTime || Date.now();
+            const timeSec = Math.max(1, (now - state.startTime) / 1000);
+            const timeMins = timeSec / 60;
             
-            // Calcolo approssimativo basato su caratteri scritti (input value length)
-            let totalChars = 0;
-            // Somma frasi precedenti
-            for(let i=0; i<state.level; i++) totalChars += frasi[i].length;
-            // Aggiungi frase corrente
+            // Calcolo caratteri corretti totali (somma frasi completate + attuale)
+            let totalCorrectChars = 0;
+            for(let i=0; i<state.level; i++) totalCorrectChars += frasi[i].length;
+            // Se non siamo in game over, aggiungi parziale (qui semplifichiamo)
             if (!els.gameArea.classList.contains('hidden')) {
-                 totalChars += els.input.value.length;
+                 totalCorrectChars += els.input.value.length;
             }
 
-            const wpm = Math.round((totalChars / 5) / timeMins);
-            if (wpm > state.maxWPM) {
-                state.maxWPM = wpm;
-                updateRecords();
+            // RAW WPM = (Tutti i tasti premuti / 5) / Minuti
+            const raw = Math.round((state.totalKeystrokes / 5) / timeMins) || 0;
+
+            // NET WPM = ((Caratteri Corretti) / 5) / Minuti
+            // (Una formula standard sottrae gli errori, qui usiamo i corretti netti)
+            const wpm = Math.round((totalCorrectChars / 5) / timeMins) || 0;
+
+            // Accuratezza
+            let acc = 0;
+            if (state.totalKeystrokes > 0) {
+                acc = Math.round(((state.totalKeystrokes - state.sessionErrors) / state.totalKeystrokes) * 100);
             }
+            if (acc < 0) acc = 0;
+
+            // Consistenza (Stima): Rapporto tra WPM Netto e Raw. Più sono vicini, più sei consistente.
+            let consistency = 0;
+            if (raw > 0) {
+                consistency = Math.round((wpm / raw) * 100);
+            }
+            if (consistency > 100) consistency = 100;
+
+            return { wpm, raw, acc, consistency, timeSec };
         }
 
         function updateUI() {
@@ -559,6 +638,12 @@
             els.recWPM.textContent = state.maxWPM;
         }
 
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${String(s).padStart(2,'0')}`;
+        }
+
         function startTimer() {
             if (timerInterval) return;
             timerInterval = setInterval(() => {
@@ -573,7 +658,6 @@
             timerInterval = null;
         }
 
-        // INIT on Load per sicurezza DOM
         window.onload = initGame;
 
     </script>
