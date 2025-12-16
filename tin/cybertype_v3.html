@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER-TYPE // V2.3 Stable</title>
+    <title>CYBER-TYPE // V2.7 Reliability Fix</title>
     <style>
         /* --- STILI CYBERPUNK --- */
         :root {
@@ -33,12 +33,12 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            user-select: none; /* Evita selezioni accidentali */
+            user-select: none;
         }
 
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             border: 2px solid var(--color-neon-green);
             box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
             padding: 30px;
@@ -60,19 +60,25 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 25px;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid var(--color-accent-blue);
             background: rgba(0,0,0,0.3);
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
             font-size: 1.1em;
+            align-items: center;
+        }
+
+        .status-group {
+            display: flex;
+            gap: 15px;
         }
 
         .error-counter { color: var(--color-neon-red); font-weight: bold; }
         .session-record {
             color: var(--color-dark-bg);
             background-color: var(--color-neon-green);
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 2px;
             font-weight: bold;
         }
@@ -87,7 +93,7 @@
             min-height: 80px;
             white-space: pre-wrap;
             line-height: 1.5;
-            cursor: text;
+            cursor: text; /* Cursore testo per indicare che è l'area attiva */
         }
 
         .corretto { color: var(--color-neon-violet); text-shadow: 0 0 5px var(--color-neon-violet); }
@@ -95,22 +101,26 @@
             color: var(--color-neon-red); 
             background-color: rgba(255, 0, 0, 0.4); 
             text-shadow: 0 0 5px red;
+            text-decoration: underline;
         }
         .attuale { 
             border-bottom: 3px solid var(--color-neon-yellow); 
             animation: blink 1s infinite; 
+            background-color: rgba(255, 255, 0, 0.1);
         }
 
         @keyframes blink { 50% { border-color: transparent; } }
 
         /* --- INPUT NASCOSTO MA ATTIVO --- */
+        /* Opacità 0 ma dimensioni 1px per garantire il focus su tutti i browser */
         #input-area {
             position: absolute;
             opacity: 0;
             top: 0;
             left: 0;
-            height: 0;
-            width: 0;
+            height: 1px; 
+            width: 1px;
+            pointer-events: none;
         }
 
         /* --- MESSAGGI OVERLAY --- */
@@ -120,15 +130,27 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: var(--color-neon-red);
-            font-size: 2.5em;
+            font-size: 2em; 
             font-weight: bold;
             text-shadow: 0 0 20px red;
-            background: rgba(0,0,0,0.9);
-            padding: 40px;
+            background: rgba(0,0,0,0.95);
+            padding: 30px;
             border: 2px solid red;
             z-index: 100;
-            display: none; /* Gestito via JS */
+            display: none;
             text-align: center;
+            box-shadow: 0 0 50px rgba(255,0,0,0.5);
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .overlay-img {
+            display: block;
+            margin: 20px auto 0 auto;
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--color-neon-red);
+            box-shadow: 0 0 15px var(--color-neon-red);
         }
 
         /* --- SCHERMATA RISULTATI --- */
@@ -179,21 +201,26 @@
 <body>
 
     <div class="container" id="game-container">
-        <h1>// CYBER-TYPE V2.3 //</h1>
+        <h1>// CYBER-TYPE V2.7 //</h1>
 
         <div class="status-bar" id="status-bar">
             <div class="status-item">Livello: <span id="ui-level">1</span>/25</div>
-            <div class="status-item error-counter">Errori Sessione: <span id="ui-errors-total">0</span>/4</div>
-            <div class="status-item">Tempo: <span id="ui-timer">20:00</span></div>
+            
+            <div class="status-group">
+                <div class="status-item error-counter">Err. Liv: <span id="ui-errors-level">0</span>/2</div>
+                <div class="status-item error-counter" style="border-left: 1px solid #333; padding-left: 15px;">Err. Sess: <span id="ui-errors-total">0</span>/4</div>
+            </div>
+
+            <div class="status-item">Tempo: <span id="ui-timer">25:00</span></div>
             <div class="status-item session-record">
-                MAX LV: <span id="rec-level">1</span> | WPM: <span id="rec-wpm">0</span>
+                REC: Lv <span id="rec-level">1</span> | WPM <span id="rec-wpm">0</span>
             </div>
         </div>
 
-        <div id="feedback-overlay">REGRESSIONE SISTEMA</div>
+        <div id="feedback-overlay"></div>
 
         <div id="game-area">
-            <div id="frase-display">Caricamento sistema...</div>
+            <div id="frase-display">Inizializzazione...</div>
             <input type="text" id="input-area" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
 
@@ -203,7 +230,7 @@
             <div id="res-msg" class="result-title"></div>
             <div class="stat-box">
                 <div>
-                    <span>WPM</span>
+                    <span>WPM FINALE</span>
                     <span id="res-wpm" class="big-stat">0</span>
                 </div>
                 <div>
@@ -246,64 +273,113 @@
         ];
 
         const MAX_ERRORS_SESSION = 4;
-        const MAX_TIME_SEC = 20 * 60;
+        const MAX_ERRORS_LEVEL = 2;
+        const MAX_TIME_SEC = 25 * 60;
 
         // --- STATO ---
         let state = {
             level: 0,
             sessionErrors: 0,
+            levelErrors: 0,
             timeLeft: MAX_TIME_SEC,
             isRunning: false,
-            isLocked: false, // Blocca input durante le animazioni
+            isLocked: false,
             startTime: 0,
             maxLevelReached: 1,
-            maxWPM: 0,
-            inputBuffer: "" // Buffer manuale per controllo totale
+            maxWPM: 0
         };
 
         let timerInterval = null;
-
-        // --- DOM ELEMENTS ---
-        const els = {
-            display: document.getElementById('frase-display'),
-            input: document.getElementById('input-area'),
-            level: document.getElementById('ui-level'),
-            errTotal: document.getElementById('ui-errors-total'),
-            timer: document.getElementById('ui-timer'),
-            recLevel: document.getElementById('rec-level'),
-            recWPM: document.getElementById('rec-wpm'),
-            overlay: document.getElementById('feedback-overlay'),
-            gameArea: document.getElementById('game-area'),
-            statusBar: document.getElementById('status-bar'),
-            finalScreen: document.getElementById('risultato-finale'),
-            resMsg: document.getElementById('res-msg'),
-            resWPM: document.getElementById('res-wpm'),
-            resACC: document.getElementById('res-acc'),
-            btnReset: document.getElementById('btn-reset'),
-            btnRestart: document.getElementById('btn-restart'),
-            container: document.getElementById('game-container')
-        };
+        let els = {}; // Oggetto DOM inizializzato dopo
 
         // --- CORE FUNCTIONS ---
 
         function initGame() {
+            // Inizializza riferimenti DOM
+            els = {
+                display: document.getElementById('frase-display'),
+                input: document.getElementById('input-area'),
+                level: document.getElementById('ui-level'),
+                errLevel: document.getElementById('ui-errors-level'),
+                errTotal: document.getElementById('ui-errors-total'),
+                timer: document.getElementById('ui-timer'),
+                recLevel: document.getElementById('rec-level'),
+                recWPM: document.getElementById('rec-wpm'),
+                overlay: document.getElementById('feedback-overlay'),
+                gameArea: document.getElementById('game-area'),
+                statusBar: document.getElementById('status-bar'),
+                finalScreen: document.getElementById('risultato-finale'),
+                resMsg: document.getElementById('res-msg'),
+                resWPM: document.getElementById('res-wpm'),
+                resACC: document.getElementById('res-acc'),
+                btnReset: document.getElementById('btn-reset'),
+                btnRestart: document.getElementById('btn-restart'),
+                container: document.getElementById('game-container')
+            };
+
+            // Setup Listeners
+            setupListeners();
             resetSession(true);
-            document.addEventListener('keydown', handleGlobalKeydown);
-            els.fraseDisplay = document.getElementById('frase-display');
-            // Clicca ovunque per focus
-            document.addEventListener('click', (e) => {
-                if(e.target.tagName !== 'BUTTON' && !state.isLocked) els.input.focus();
+        }
+
+        function setupListeners() {
+            // Usa l'evento 'input' nativo per la massima compatibilità
+            els.input.addEventListener('input', handleInputEvent);
+            
+            // Gestione Backspace e tasti speciali via keydown
+            els.input.addEventListener('keydown', (e) => {
+                if(e.key === 'Backspace') {
+                    e.preventDefault(); // Blocca cancellazione
+                }
             });
+
+            // Focus globale
+            document.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'BUTTON' && !state.isLocked && !els.finalScreen.classList.contains('hidden')) {
+                    // Non fare focus se stiamo cliccando pulsanti o se il gioco è finito
+                } else if (!state.isLocked) {
+                    els.input.focus();
+                }
+            });
+
+            els.btnReset.addEventListener('click', () => resetSession(false));
+            els.btnRestart.addEventListener('click', () => resetSession(false));
+        }
+
+        function handleInputEvent(e) {
+            if (state.isLocked) {
+                // Se bloccato, resetta l'input e ignora
+                els.input.value = els.input.value.slice(0, -1); 
+                return;
+            }
+
+            if (!state.isRunning) {
+                state.isRunning = true;
+                state.startTime = Date.now();
+                startTimer();
+            }
+
+            // Ottieni l'ultimo carattere inserito
+            const rawValue = els.input.value;
+            // Se l'utente ha incollato o scritto troppo veloce, prendiamo solo l'ultimo char valido per la logica "Fluid"
+            // Ma per semplicità, processiamo l'ultimo char aggiunto rispetto al buffer visuale
+            // Qui usiamo la lunghezza del valore input come indice
+            
+            const charTyped = e.data; // e.data contiene il carattere inserito
+            
+            if (!charTyped) return; // Ignora input non di testo (es. backspace su mobile)
+
+            processInput(charTyped);
         }
 
         function resetSession(fullReset = false) {
             stopTimer();
             state.level = 0;
             state.sessionErrors = 0;
+            state.levelErrors = 0;
             state.timeLeft = MAX_TIME_SEC;
             state.isRunning = false;
             state.isLocked = false;
-            state.inputBuffer = "";
             
             if(fullReset) {
                 state.maxLevelReached = 1;
@@ -324,134 +400,109 @@
         function loadLevel() {
             const txt = frasi[state.level];
             els.display.innerHTML = '';
-            // Creazione spans
             txt.split('').forEach(char => {
                 const s = document.createElement('span');
                 s.textContent = char;
                 els.display.appendChild(s);
             });
             
-            // Highlight primo carattere
             if(els.display.firstChild) els.display.firstChild.classList.add('attuale');
             
-            state.inputBuffer = "";
-            els.input.value = "";
+            state.levelErrors = 0;
+            els.input.value = ""; // Resetta input fisico
             els.input.focus();
-            state.isLocked = false; // Sblocca input
+            state.isLocked = false;
             
             updateUI();
-        }
-
-        function handleGlobalKeydown(e) {
-            // Se bloccato o non gioco, ignora
-            if (state.isLocked || els.finalScreen.classList.contains('hidden') === false) return;
-
-            // Focus costante
-            els.input.focus();
-
-            // Ignora tasti non caratteri (shift, ctrl, alt, ecc)
-            if (e.key.length > 1) {
-                // Gestione Backspace DISABILITATA per questa modalità hardcore
-                if (e.key === 'Backspace') {
-                    e.preventDefault(); 
-                    // Opzionale: suono errore
-                }
-                return;
-            }
-
-            // Avvio gioco al primo tasto
-            if (!state.isRunning) {
-                state.isRunning = true;
-                state.startTime = Date.now();
-                startTimer();
-            }
-
-            processInput(e.key);
         }
 
         function processInput(char) {
             const currentPhrase = frasi[state.level];
-            const currentIndex = state.inputBuffer.length;
+            const currentIndex = els.input.value.length - 1; // Indice basato su quanto scritto
+            
+            if (currentIndex >= currentPhrase.length) return; // Protezione out of bounds
+
             const targetChar = currentPhrase[currentIndex];
             const spans = els.display.querySelectorAll('span');
+            const currentSpan = spans[currentIndex];
 
-            // 1. Controllo Correttezza
+            // 1. Logica Corretto/Errato
             if (char === targetChar) {
-                // CORRETTO
-                spans[currentIndex].classList.remove('attuale');
-                spans[currentIndex].classList.add('corretto');
-                state.inputBuffer += char;
-
-                // Sposta cursore
-                if (currentIndex + 1 < currentPhrase.length) {
-                    spans[currentIndex + 1].classList.add('attuale');
-                } else {
-                    // LIVELLO COMPLETATO
-                    levelComplete();
-                }
-
+                currentSpan.classList.add('corretto');
             } else {
-                // ERRORE
-                handleError(spans[currentIndex]);
+                currentSpan.classList.add('sbagliato');
+                
+                state.levelErrors++;
+                state.sessionErrors++;
+                updateUI();
+
+                if (checkCriticalLimits(currentSpan)) return;
+            }
+
+            // 2. Avanzamento Visivo
+            currentSpan.classList.remove('attuale');
+            
+            // Prossimo carattere
+            if (currentIndex + 1 < currentPhrase.length) {
+                spans[currentIndex + 1].classList.add('attuale');
+            } else {
+                levelComplete();
             }
         }
 
-        function handleError(spanElement) {
-            state.isLocked = true; // Blocca tutto immediatamente
-            
-            // Feedback visivo immediato sul carattere
-            spanElement.classList.remove('attuale');
-            spanElement.classList.add('sbagliato');
-
-            // Incrementa errori sessione
-            state.sessionErrors++;
-            updateUI();
-
-            // Controlla Game Over
+        function checkCriticalLimits(spanElement) {
+            // Caso 1: Troppi errori totali (Game Over)
             if (state.sessionErrors >= MAX_ERRORS_SESSION) {
-                setTimeout(() => triggerGameOver("SISTEMA BLOCCATO: TROPPI ERRORI"), 800);
-            } else {
-                // Regressione Livello
-                setTimeout(triggerRegression, 800); // Attesa per far vedere l'errore rosso
+                state.isLocked = true;
+                setTimeout(() => triggerGameOver("SISTEMA BLOCCATO: TROPPI ERRORI TOTALI"), 500);
+                return true;
             }
+
+            // Caso 2: Troppi errori nel livello (Regressione)
+            if (state.levelErrors >= MAX_ERRORS_LEVEL) {
+                state.isLocked = true;
+                setTimeout(triggerRegression, 800);
+                return true;
+            }
+
+            return false;
         }
 
         function triggerRegression() {
-            const msg = state.level === 0 ? "RIAVVIO LIVELLO" : "REGRESSIONE LIVELLO";
+            const msg = state.level === 0 ? "RIAVVIO ESERCIZIO" : "REGRESSIONE LIVELLO";
+            const memeUrl = "https://i.imgflip.com/4u25yt.png";
             
-            // Mostra Overlay
-            els.overlay.textContent = msg;
+            els.overlay.innerHTML = `
+                <div>${msg}</div>
+                <img src="${memeUrl}" class="overlay-img" alt="Bernie Sanders Waiting">
+            `;
+            
             els.overlay.style.display = 'block';
             els.container.classList.add('shake');
 
-            // Calcolo nuovo livello
             if (state.level > 0) state.level--;
             
-            // Dopo animazione
             setTimeout(() => {
                 els.overlay.style.display = 'none';
                 els.container.classList.remove('shake');
-                loadLevel(); // Questo resetta anche il buffer e sblocca l'input
-            }, 1000);
+                loadLevel();
+            }, 1500);
         }
 
         function levelComplete() {
             state.level++;
             
-            // Update Records
             if (state.level + 1 > state.maxLevelReached) {
                 state.maxLevelReached = state.level + 1;
                 updateRecords();
             }
-
-            // Calcolo WPM temporaneo
             calculateWPM();
 
             if (state.level >= frasi.length) {
                 triggerGameOver("SIMULAZIONE COMPLETATA CON SUCCESSO!", true);
             } else {
                 state.isLocked = true;
-                setTimeout(loadLevel, 200); // Breve pausa tra i livelli
+                setTimeout(loadLevel, 200);
             }
         }
 
@@ -465,7 +516,7 @@
             els.resMsg.textContent = msg;
             els.resMsg.style.color = success ? 'var(--color-neon-green)' : 'var(--color-neon-red)';
             
-            calculateWPM(); // Finale
+            calculateWPM();
             els.resWPM.textContent = state.maxWPM;
             els.resACC.textContent = success ? "100%" : "FAIL";
         }
@@ -477,11 +528,14 @@
             const timeMins = (now - state.startTime) / 1000 / 60;
             if (timeMins <= 0) return;
             
-            // Stima grossolana basata sul livello raggiunto (caratteri totali approssimati)
-            // In un sistema reale si sommano i char esatti.
+            // Calcolo approssimativo basato su caratteri scritti (input value length)
             let totalChars = 0;
+            // Somma frasi precedenti
             for(let i=0; i<state.level; i++) totalChars += frasi[i].length;
-            totalChars += state.inputBuffer.length;
+            // Aggiungi frase corrente
+            if (!els.gameArea.classList.contains('hidden')) {
+                 totalChars += els.input.value.length;
+            }
 
             const wpm = Math.round((totalChars / 5) / timeMins);
             if (wpm > state.maxWPM) {
@@ -492,6 +546,7 @@
 
         function updateUI() {
             els.level.textContent = state.level + 1;
+            els.errLevel.textContent = state.levelErrors;
             els.errTotal.textContent = state.sessionErrors;
             
             const m = Math.floor(state.timeLeft / 60);
@@ -518,12 +573,8 @@
             timerInterval = null;
         }
 
-        // --- LISTENERS ---
-        els.btnReset.addEventListener('click', () => resetSession(false)); // Reset manuale (mantiene record)
-        els.btnRestart.addEventListener('click', () => resetSession(false)); // Restart da Game Over
-
-        // Start
-        initGame();
+        // INIT on Load per sicurezza DOM
+        window.onload = initGame;
 
     </script>
 </body>
