@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Arduino - Ripasso STA</title>
+    <style>
+        :root {
+            --primary-color: #00979C; /* Arduino Teal */
+            --secondary-color: #006468;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin-bottom: 2rem;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 15px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-color);
+        }
+
+        .card-front {
+            /* Domanda */
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            position: absolute;
+            top: 20px;
+        }
+
+        .content {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .card-back .content {
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Ripasso Arduino - Materia STA</h1>
+        <p>Preparazione all'interrogazione su Tinkercad e C++</p>
+    </header>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="card-face card-front">
+                <span class="label">Domanda</span>
+                <div class="content" id="question-text">Caricamento in corso...</div>
+            </div>
+            <div class="card-face card-back">
+                <span class="label">Risposta</span>
+                <div class="content" id="answer-text">Caricamento in corso...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prev-btn" onclick="prevCard()">&#8592; Precedente</button>
+        <div class="progress" id="progress-text">1 / 20</div>
+        <button id="next-btn" onclick="nextCard()">Successiva &#8594;</button>
+    </div>
+
+    <div class="instructions">
+        Clicca sulla carta per girarla e vedere la risposta.
+    </div>
+
+    <script>
+	const cardsData = [
+            { q: "Quali sono le due sezioni obbligatorie che ogni programma Arduino deve avere?", a: "Le funzioni setup() e loop()." },
+            { q: "Quante volte viene eseguito il codice all'interno del setup()?", a: "Viene eseguito una sola volta quando si accende Arduino o si preme il tasto Reset." },
+            { q: "Qual è lo scopo principale della funzione setup()?", a: "Si usa per configurare i pin (es. impostarli come INPUT o OUTPUT) o far partire la comunicazione con il computer." },
+            { q: "Come si comporta il codice all'interno della funzione loop()?", a: "Viene eseguito all'infinito, riga dopo riga. Arrivato all'ultima istruzione, ricomincia istantaneamente dalla prima." },
+            { q: "Che cos'è una variabile in programmazione?", a: "È come una 'scatola' con un'etichetta in cui possiamo conservare un'informazione (un numero, una parola, lo stato di un sensore)." },
+            { q: "Quali sono i tre elementi necessari per dichiarare e assegnare un valore a una variabile?", a: "Bisogna specificare il TIPO (es. int), il NOME della variabile, e il VALORE da metterci dentro." },
+            { q: "A cosa serve il comando pinMode()?", a: "Si usa nel setup per dire ad Arduino come si deve comportare un determinato pin (se come Entrata o come Uscita)." },
+            { q: "Che differenza c'è tra un pin configurato come OUTPUT e uno come INPUT?", a: "OUTPUT serve per inviare elettricità (es. accendere LED), mentre INPUT serve per 'ascoltare' se c'è elettricità (es. leggere pulsanti)." },
+            { q: "Quali sono gli unici due stati possibili quando si usa il comando digitalWrite()?", a: "HIGH (manda 5 Volt e accende) e LOW (manda 0 Volt e spegne)." },
+            { q: "Che tipo di valore restituisce il comando analogRead()?", a: "Restituisce un numero che va da 0 (nessuna tensione) a 1023 (massima tensione, 5V)." },
+            { q: "Per quali tipi di componenti è perfetto l'utilizzo di analogRead()?", a: "È perfetto per sensori di luce, sensori di temperatura o potenziometri." },
+            { q: "A cosa serve il comando delay() e in quale unità di misura lavora?", a: "Mette in pausa l'intero programma per un certo lasso di tempo; il tempo si misura in millisecondi (1000 = 1 sec)." },
+            { q: "Qual è la funzione del costrutto 'if'?", a: "Permette ad Arduino di prendere decisioni: 'SE questa condizione è vera, ALLORA fai questo. ALTRIMENTI fai quest'altro'." },
+            { q: "Quale operatore si usa all'interno di un 'if' per verificare se due valori sono esattamente uguali?", a: "Si usa il doppio uguale: ==" },
+            { q: "Quando è utile utilizzare un ciclo 'for'?", a: "Quando si vuole ripetere un blocco di istruzioni per un numero esatto e predefinito di volte." },
+            { q: "Quali sono le tre regole/parametri necessari tra le parentesi tonde di un ciclo for?", a: "1) Da dove parto; 2) Fino a quando continuo; 3) Di quanto vado avanti ogni volta." },
+            { q: "Quale comando si usa se vogliamo far brillare un LED solo a metà della sua potenza?", a: "Si usa il comando analogWrite()." },
+            { q: "Come fa Arduino a simulare una luce più debole sui pin digitali se può erogare solo 0V o 5V?", a: "Usa il trucco del PWM: accende e spegne il pin a una velocità talmente elevata che l'occhio percepisce solo una luce più debole." },
+            { q: "Su quali pin di Arduino è possibile utilizzare il comando analogWrite() (PWM)?", a: "Solo sui pin che hanno il simbolo dell'onda (~) stampato accanto al numero." },
+            { q: "Qual è la scala di valori utilizzata dal comando analogWrite() per le sfumature?", a: "Utilizza un numero che va da 0 (completamente spento, 0%) a 255 (completamente acceso, 100%)." },
+            { q: "Quale linguaggio di programmazione capisce Arduino?", a: "Arduino capisce un linguaggio chiamato C++." },
+            { q: "Cosa facciamo letteralmente quando scriviamo il codice per Arduino?", a: "Stiamo letteralmente dando istruzioni al 'cervello' della nostra scheda." },
+            { q: "Come si scrive in C++ il codice per creare una variabile di nome 'velocita' e assegnarle il valore 400?", a: "int velocita = 400;" },
+            { q: "Quale comando si usa per leggere se un pulsante è premuto o no (ovvero se lo stato è HIGH o LOW)?", a: "Si usa il comando digitalRead()." },
+            { q: "Come vengono chiamati i 'buchini neri' presenti sulla scheda e qual è il loro scopo generico?", a: "Si chiamano pin e possono inviare elettricità (Uscite) o 'ascoltare' se c'è elettricità (Entrate)." },
+            { q: "Qual è la differenza principale tra un segnale digitale e uno analogico in termini di percezione?", a: "A differenza del digitale che riconosce solo acceso/spento, l'analogico percepisce le sfumature." },
+            { q: "Perché è fondamentale usare il comando delay() se vogliamo che una luce resti accesa in modo visibile?", a: "Perché i microcontrollori ragionano a velocità incredibili e dobbiamo dirgli di fermarsi per far sì che il nostro occhio noti il cambiamento." },
+            { q: "Oltre al doppio uguale (==), quali altri simboli matematici sono utili per confrontare due valori in un costrutto 'if'?", a: "Altri simboli utili sono > (maggiore) e < (minore)." },
+            { q: "Nel ciclo for, cosa significa esattamente l'istruzione 'i++'?", a: "L'istruzione 'i++' significa 'aggiungi 1 ad i ad ogni giro'." },
+            { q: "Quali sono i valori da inserire in analogWrite() per spegnere completamente, accendere a metà e accendere al massimo un componente?", a: "0 per completamente spento, 127 per metà potenza e 255 per il massimo." }
+        ];       
+       
+
+        let currentIndex = 0;
+        const flashcard = document.getElementById('flashcard');
+        const questionText = document.getElementById('question-text');
+        const answerText = document.getElementById('answer-text');
+        const progressText = document.getElementById('progress-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function updateCard() {
+            // Se la carta è girata sulla risposta, rigirala sulla domanda prima di cambiare testo
+            if (flashcard.classList.contains('flipped')) {
+                flashcard.classList.remove('flipped');
+                // Aspetta la fine dell'animazione prima di cambiare il testo
+                setTimeout(() => {
+                    populateText();
+                }, 300);
+            } else {
+                populateText();
+            }
+        }
+
+        function populateText() {
+            questionText.textContent = cardsData[currentIndex].q;
+            answerText.textContent = cardsData[currentIndex].a;
+            progressText.textContent = `${currentIndex + 1} / ${cardsData.length}`;
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === cardsData.length - 1;
+        }
+
+        function flipCard() {
+            flashcard.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < cardsData.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        // Inizializza la prima carta
+        updateCard();
+    </script>
+</body>
+</html>
