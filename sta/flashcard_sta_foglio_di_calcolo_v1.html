@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Google Fogli - Ripasso</title>
+    <style>
+        :root {
+            --primary-color: #0F9D58; /* Google Fogli Green */
+            --secondary-color: #0b8043;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin-bottom: 2rem;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 15px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-color);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            position: absolute;
+            top: 20px;
+        }
+
+        .content {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .card-back .content {
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Ripasso Google Fogli</h1>
+        <p>Preparazione all'interrogazione sulle Funzioni e la Struttura Base</p>
+    </header>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="card-face card-front">
+                <span class="label">Domanda</span>
+                <div class="content" id="question-text">Caricamento in corso...</div>
+            </div>
+            <div class="card-face card-back">
+                <span class="label">Risposta</span>
+                <div class="content" id="answer-text">Caricamento in corso...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prev-btn" onclick="prevCard()">&#8592; Precedente</button>
+        <div class="progress" id="progress-text">1 / 20</div>
+        <button id="next-btn" onclick="nextCard()">Successiva &#8594;</button>
+    </div>
+
+    <div class="instructions">
+        Clicca sulla carta per girarla e vedere la risposta.
+    </div>
+
+    <script>
+        const cardsData = [
+            { q: "Cos'è un foglio di calcolo e come è organizzato?", a: "È un software applicativo organizzato in una griglia composta da righe (identificate da numeri) e colonne (identificate da lettere)." },
+            { q: "Come viene identificata l'intersezione tra una riga e una colonna?", a: "È chiamata 'cella' ed è identificata dalle sue coordinate. Esempio: A1." },
+            { q: "Con quale simbolo deve obbligatoriamente iniziare qualsiasi operazione matematica o funzione?", a: "Deve obbligatoriamente iniziare con il simbolo uguale (=)." },
+            { q: "Cosa succede ai riferimenti relativi durante le operazioni di copia e incolla?", a: "I riferimenti si adattano automaticamente in proporzione alla direzione e alla distanza dello spostamento." },
+            { q: "Come si ottengono i riferimenti assoluti per bloccare una cella specifica?", a: "Si ottengono anteponendo il simbolo del dollaro alle coordinate della cella. Esempio: $A$1." },
+            { q: "Cos'è un riferimento misto?", a: "È una via di mezzo che blocca esclusivamente la colonna (es. =$A1) oppure esclusivamente la riga (es. =A$1)." },
+            { q: "A cosa serve la funzione SOMMA e qual è la sua sintassi?", a: "Addiziona i valori in un intervallo. Esempio: =SOMMA(A1:A10) restituisce il totale dei numeri dalla cella A1 ad A10." },
+            { q: "Quale funzione conta quante celle contengono esclusivamente dati numerici?", a: "La funzione CONTA.NUMERI. Esempio: =CONTA.NUMERI(C1:C20) ignora testo e celle vuote." },
+            { q: "Qual è lo scopo della funzione SE?", a: "Esegue un test logico e restituisce un risultato se Vero, e un altro se Falso. Esempio: =SE(D2>100; \"Sconto\"; \"Intero\")." },
+            { q: "A cosa serve la funzione CERCA.VERT?", a: "Cerca un valore nella prima colonna di una matrice e restituisce un valore sulla stessa riga, ma in un'altra colonna." },
+            { q: "Nella funzione CERCA.VERT, cosa bisogna inserire come ultimo argomento per trovare una corrispondenza esatta?", a: "Richiede di scrivere FALSO. Esempio: =CERCA.VERT(A2; $E$2:$G$10; 2; FALSO)." },
+            { q: "Quando è consigliabile utilizzare i riferimenti assoluti nella funzione CERCA.VERT?", a: "Per bloccare la 'matrice_tabella', affinché l'area (es. $E$2:$G$10) non si sposti trascinando la formula." },
+            { q: "A cosa serve la funzione SOMMA.SE?", a: "Somma i valori in un intervallo solo se soddisfano una condizione. Esempio: =SOMMA.SE(A1:A10; \"Smartphone\"; B1:B10)." },
+            { q: "Cosa fa la funzione CONTA.SE?", a: "Conta il numero di celle che rispettano un singolo criterio prestabilito. Esempio: =CONTA.SE(C1:C20; \">50\")." },
+            { q: "A cosa serve la funzione RATA?", a: "Calcola l'importo di un pagamento periodico per un prestito, con pagamenti costanti e tasso fisso." },
+            { q: "Quando si usa la funzione RATA per rate mensili su tassi annuali, cosa bisogna fare?", a: "Uniformare le unità temporali. Esempio: =RATA(5%/12; 10*12; 50000) per 10 anni al 5% annuo." },
+            { q: "Qual è la differenza tra il formato Valuta e il formato Percentuale?", a: "Valuta aggiunge il simbolo monetario e due decimali. Percentuale moltiplica il valore per cento e aggiunge il %." },
+            { q: "Cos'è la formattazione condizionale?", a: "Modifica in automatico l'aspetto di una cella (es. colore verde o rosso) impostando delle regole sui valori critici." },
+            { q: "Qual è il grafico migliore per visualizzare le percentuali di un intero?", a: "Il grafico a torta, rende chiaro quanto ogni categoria incida sul totale." },
+            { q: "Quando è preferibile utilizzare un grafico a colonne (o istogramma)?", a: "Per confrontare direttamente i valori di due o più categorie affiancandole lungo un asse." },
+            { q: "Quali sono gli operatori matematici fondamentali in un foglio di calcolo?", a: "Addizione (+), sottrazione (-), moltiplicazione (*) e divisione (/). Esempio: =A1+B1." },
+            { q: "Come ragiona il programma quando copia una formula con 'riferimenti relativi'?", a: "Memorizza la distanza relativa, non le coordinate esatte. Esempio: copiando =A1+B1 in basso, diventa =A2+B2." },
+            { q: "In quali casi specifici è essenziale usare i riferimenti assoluti?", a: "Quando si usa un parametro esterno fisso (tasso/sconto) o la matrice in CERCA.VERT. Esempio: =A1*$D$1." },
+            { q: "Come si scrive un riferimento 'misto' per bloccare esclusivamente una colonna o una riga?", a: "Anteponendo il $ solo alla lettera o solo al numero. Esempio colonna: =$A1. Esempio riga: =A$1." },
+            { q: "A cosa serve la funzione MEDIA e come si scrive?", a: "Calcola la media aritmetica. Esempio: =MEDIA(B1:B5) restituisce il valore medio di quelle cinque celle." },
+            { q: "Quali sono i tre parametri richiesti dalla funzione SE?", a: "Test logico, valore se vero, valore se falso. Esempio: =SE(D2>100; \"Sconto\"; \"Intero\")." },
+            { q: "Da quali elementi è composta la sintassi completa della funzione CERCA.VERT?", a: "=CERCA.VERT(valore_ricerca; matrice_tabella; indice; ultimo_argomento)." },
+            { q: "Qual è la sintassi della funzione SOMMA.SE e cosa indicano i suoi argomenti?", a: "=SOMMA.SE(intervallo; criterio; intervallo_somma). Cerca il criterio nel primo intervallo e somma i valori corrispondenti nel secondo." },
+            { q: "Fornisci un esempio pratico di utilizzo della funzione CONTA.SE.", a: "Esempio: =CONTA.SE(C1:C20; \">50\"). Restituisce quante celle sono strettamente maggiori di 50." },
+            { q: "A cosa serve l'opzione 'testo a capo' nella formattazione delle celle?", a: "Forza il testo su più righe all'interno della stessa cella se la larghezza non basta, utilissimo per le intestazioni." }
+        ];
+
+        let currentIndex = 0;
+        const flashcard = document.getElementById('flashcard');
+        const questionText = document.getElementById('question-text');
+        const answerText = document.getElementById('answer-text');
+        const progressText = document.getElementById('progress-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function updateCard() {
+            if (flashcard.classList.contains('flipped')) {
+                flashcard.classList.remove('flipped');
+                setTimeout(() => {
+                    populateText();
+                }, 300);
+            } else {
+                populateText();
+            }
+        }
+
+        function populateText() {
+            questionText.textContent = cardsData[currentIndex].q;
+            answerText.textContent = cardsData[currentIndex].a;
+            progressText.textContent = `${currentIndex + 1} / ${cardsData.length}`;
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === cardsData.length - 1;
+        }
+
+        function flipCard() {
+            flashcard.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < cardsData.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        updateCard();
+    </script>
+</body>
+</html>
