@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valutazione Laboratoriale: Arduino</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --container-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --error: #dc2626;
+            --error-bg: #fee2e2;
+            --border: #e2e8f0;
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--text-main);
+            color: #fff;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .hud-panel {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-item span {
+            color: #94a3b8;
+            margin-right: 0.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .progress-wrapper {
+            background-color: var(--border);
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent);
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--container-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent);
+            background-color: #eff6ff;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 1rem;
+            transform: scale(1.2);
+            accent-color: var(--accent);
+        }
+
+        .feedback-panel {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .feedback-panel.correct {
+            display: block;
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .feedback-panel.incorrect {
+            display: block;
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid #fecaca;
+        }
+
+        .explanation {
+            margin-top: 0.5rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 2rem;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-submit:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .results-summary {
+            display: none;
+            background: var(--container-bg);
+            border: 2px solid var(--text-main);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="hud-panel">
+            <div class="hud-item"><span>TEMPO</span><strong id="timerDisplay">00:00</strong></div>
+            <div class="hud-item"><span>XP</span><strong id="xpDisplay">0</strong> / 2000</div>
+            <div class="hud-item"><span>LIVELLO</span><strong id="levelDisplay">Analista</strong></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="progress-wrapper">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <form id="assessmentForm">
+            <!-- Domanda 1 -->
+            <div class="question-card">
+                <div class="question-text">1. Qual è la funzione della resistenza di pull-down inserita nel circuito del pulsante?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q1" value="a"> A) Limitare la corrente assorbita dal LED.</label>
+                    <label class="option-label"><input type="radio" name="q1" value="b"> B) Forzare uno stato logico basso (LOW) stabile al pin quando il pulsante è rilasciato.</label>
+                    <label class="option-label"><input type="radio" name="q1" value="c"> C) Aumentare la tensione sul pin digitale per attivare il PWM.</label>
+                </div>
+                <div class="feedback-panel" id="fb-q1"></div>
+            </div>
+
+            <!-- Domanda 2 -->
+            <div class="question-card">
+                <div class="question-text">2. La funzione analogRead() restituisce un valore numerico compreso tra 0 e 255.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q2" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q2" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q2"></div>
+            </div>
+
+            <!-- Domanda 3 -->
+            <div class="question-card">
+                <div class="question-text">3. Nel codice analizzato, per quale motivo il valore acquisito dal potenziometro viene diviso per 4?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q3" value="a"> A) Per ridurre il consumo energetico del microcontrollore.</label>
+                    <label class="option-label"><input type="radio" name="q3" value="b"> B) Per traslare il segnale in ingresso (10 bit) nel range di uscita PWM (8 bit).</label>
+                    <label class="option-label"><input type="radio" name="q3" value="c"> C) Per compensare la tolleranza resistiva del componente.</label>
+                </div>
+                <div class="feedback-panel" id="fb-q3"></div>
+            </div>
+
+            <!-- Domanda 4 -->
+            <div class="question-card">
+                <div class="question-text">4. Il terminale comune di un LED RGB a catodo comune deve essere collegato a 5V.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q4" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q4" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q4"></div>
+            </div>
+
+            <!-- Domanda 5 -->
+            <div class="question-card">
+                <div class="question-text">5. Quale costrutto C++ viene utilizzato per deviare il flusso di esecuzione in base allo stato del pulsante?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q5" value="a"> A) La struttura condizionale if...else.</label>
+                    <label class="option-label"><input type="radio" name="q5" value="b"> B) Il ciclo iterativo for.</label>
+                    <label class="option-label"><input type="radio" name="q5" value="c"> C) La funzione delay().</label>
+                </div>
+                <div class="feedback-panel" id="fb-q5"></div>
+            </div>
+
+            <!-- Domanda 6 -->
+            <div class="question-card">
+                <div class="question-text">6. L'acronimo PWM identifica la tecnica "Pulse Width Modulation".</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q6" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q6" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q6"></div>
+            </div>
+
+            <!-- Domanda 7 -->
+            <div class="question-card">
+                <div class="question-text">7. Sulla scheda Arduino Uno, i pin digitali che supportano l'uscita PWM sono contrassegnati da:</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q7" value="a"> A) Un asterisco (*)</label>
+                    <label class="option-label"><input type="radio" name="q7" value="b"> B) Una tilde (~)</label>
+                    <label class="option-label"><input type="radio" name="q7" value="c"> C) Un segno più (+)</label>
+                </div>
+                <div class="feedback-panel" id="fb-q7"></div>
+            </div>
+
+            <!-- Domanda 8 -->
+            <div class="question-card">
+                <div class="question-text">8. Qual è il valore decimale massimo accettato come parametro dalla funzione analogWrite()?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q8" value="a"> A) 1023</label>
+                    <label class="option-label"><input type="radio" name="q8" value="b"> B) 255</label>
+                    <label class="option-label"><input type="radio" name="q8" value="c"> C) 5</label>
+                </div>
+                <div class="feedback-panel" id="fb-q8"></div>
+            </div>
+
+            <!-- Domanda 9 -->
+            <div class="question-card">
+                <div class="question-text">9. L'istruzione pinMode(pin, INPUT) configura il pin specificato come linea di uscita.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q9" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q9" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q9"></div>
+            </div>
+
+            <!-- Domanda 10 -->
+            <div class="question-card">
+                <div class="question-text">10. Qual è la funzione del resistore collegato in serie al diodo LED?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q10" value="a"> A) Aumentare la tensione ai capi del componente.</label>
+                    <label class="option-label"><input type="radio" name="q10" value="b"> B) Limitare la corrente diretta per prevenire la distruzione della giunzione.</label>
+                    <label class="option-label"><input type="radio" name="q10" value="c"> C) Convertire il segnale digitale in analogico.</label>
+                </div>
+                <div class="feedback-panel" id="fb-q10"></div>
+            </div>
+
+            <!-- Domanda 11 -->
+            <div class="question-card">
+                <div class="question-text">11. Il potenziometro implementa elettricamente la funzione di partitore di tensione variabile.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q11" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q11" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q11"></div>
+            </div>
+
+            <!-- Domanda 12 -->
+            <div class="question-card">
+                <div class="question-text">12. La funzione digitalRead(pin) restituisce esclusivamente due stati logici: HIGH (1) o LOW (0).</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q12" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q12" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q12"></div>
+            </div>
+
+            <!-- Domanda 13 -->
+            <div class="question-card">
+                <div class="question-text">13. L'istruzione delay(10) sospende l'esecuzione del microcontrollore per un intervallo temporale pari a:</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q13" value="a"> A) 10 secondi</label>
+                    <label class="option-label"><input type="radio" name="q13" value="b"> B) 10 microsecondi</label>
+                    <label class="option-label"><input type="radio" name="q13" value="c"> C) 10 millisecondi</label>
+                </div>
+                <div class="feedback-panel" id="fb-q13"></div>
+            </div>
+
+            <!-- Domanda 14 -->
+            <div class="question-card">
+                <div class="question-text">14. Quale serigrafia identifica il nodo di riferimento (massa) sulla scheda Arduino Uno?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q14" value="a"> A) VIN</label>
+                    <label class="option-label"><input type="radio" name="q14" value="b"> B) GND</label>
+                    <label class="option-label"><input type="radio" name="q14" value="c"> C) AREF</label>
+                </div>
+                <div class="feedback-panel" id="fb-q14"></div>
+            </div>
+
+            <!-- Domanda 15 -->
+            <div class="question-card">
+                <div class="question-text">15. Invertire la polarità di un diodo LED (catodo a 5V, anodo a GND) provoca un cortocircuito distruttivo istantaneo sulla scheda.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q15" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q15" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q15"></div>
+            </div>
+
+            <!-- Domanda 16 -->
+            <div class="question-card">
+                <div class="question-text">16. L'istruzione pinMode(A0, INPUT) è necessaria per abilitare il campionamento tramite analogRead(A0).</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q16" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q16" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q16"></div>
+            </div>
+
+            <!-- Domanda 17 -->
+            <div class="question-card">
+                <div class="question-text">17. Quale tipo di dato in C++ è corretto per allocare in memoria il valore generato da analogRead()?</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q17" value="a"> A) int</label>
+                    <label class="option-label"><input type="radio" name="q17" value="b"> B) String</label>
+                    <label class="option-label"><input type="radio" name="q17" value="c"> C) boolean</label>
+                </div>
+                <div class="feedback-panel" id="fb-q17"></div>
+            </div>
+
+            <!-- Domanda 18 -->
+            <div class="question-card">
+                <div class="question-text">18. A livello costruttivo, un diodo LED RGB è composto internamente da:</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q18" value="a"> A) Un singolo semiconduttore a drogaggio variabile.</label>
+                    <label class="option-label"><input type="radio" name="q18" value="b"> B) Tre distinti die semiconduttori emettitori (Rosso, Verde, Blu).</label>
+                    <label class="option-label"><input type="radio" name="q18" value="c"> C) Un filamento in tungsteno tricromatico.</label>
+                </div>
+                <div class="feedback-panel" id="fb-q18"></div>
+            </div>
+
+            <!-- Domanda 19 -->
+            <div class="question-card">
+                <div class="question-text">19. In ottemperanza alla prima legge di Ohm, un incremento del valore resistivo in serie al LED causa:</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q19" value="a"> A) L'aumento della luminosità.</label>
+                    <label class="option-label"><input type="radio" name="q19" value="b"> B) La diminuzione della luminosità.</label>
+                    <label class="option-label"><input type="radio" name="q19" value="c"> C) Nessuna variazione ottica percepibile.</label>
+                </div>
+                <div class="feedback-panel" id="fb-q19"></div>
+            </div>
+
+            <!-- Domanda 20 -->
+            <div class="question-card">
+                <div class="question-text">20. Il terminale centrale del potenziometro necessita del collegamento a un ingresso analogico per acquisirne la variazione di tensione in modo continuo.</div>
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q20" value="vero"> Vero</label>
+                    <label class="option-label"><input type="radio" name="q20" value="falso"> Falso</label>
+                </div>
+                <div class="feedback-panel" id="fb-q20"></div>
+            </div>
+
+            <button type="button" class="btn-submit" id="btnSubmit">Esegui Verifica Algoritmo</button>
+        </form>
+
+        <div class="results-summary" id="resultsSummary">
+            <h2>Report di Valutazione</h2>
+            <div class="score-display" id="scoreDisplay">0 / 20</div>
+            <div class="rank-badge" id="rankBadge"></div>
+        </div>
+    </div>
+
+    <script>
+        const totaleDomande = 20;
+        let elapsedSeconds = 0;
+        let timerId;
+
+        const dbRisposte = {
+            q1: { ans: "b", text: "Forzare uno stato logico basso (LOW) stabile al pin quando il pulsante è rilasciato." },
+            q2: { ans: "falso", text: "Falso. Il convertitore ADC a 10 bit genera valori da 0 a 1023." },
+            q3: { ans: "b", text: "Per traslare il segnale in ingresso (10 bit) nel range di uscita PWM (8 bit)." },
+            q4: { ans: "falso", text: "Falso. Il terminale catodo comune va collegato al riferimento di massa (GND)." },
+            q5: { ans: "a", text: "La struttura condizionale if...else." },
+            q6: { ans: "vero", text: "Vero. Identifica la tecnica di Modulazione a Larghezza di Impulso." },
+            q7: { ans: "b", text: "Una tilde (~)." },
+            q8: { ans: "b", text: "255, corrispondente al valore massimo per un registro a 8 bit." },
+            q9: { ans: "falso", text: "Falso. La macro INPUT configura il pin come linea di ingresso." },
+            q10: { ans: "b", text: "Limitare la corrente diretta per prevenire la distruzione termica della giunzione PN." },
+            q11: { ans: "vero", text: "Vero. Agisce da partitore resistivo variabile meccanicamente." },
+            q12: { ans: "vero", text: "Vero. La lettura digitale quantizza il segnale solo in due stati discreti." },
+            q13: { ans: "c", text: "10 millisecondi." },
+            q14: { ans: "b", text: "GND (Ground)." },
+            q15: { ans: "falso", text: "Falso. Un diodo polarizzato inversamente si oppone al passaggio di corrente (fino alla tensione di breakdown)." },
+            q16: { ans: "falso", text: "Falso. I pin analogici dei microcontrollori AVR sono pre-configurati come ingressi." },
+            q17: { ans: "a", text: "Il tipo int (intero)." },
+            q18: { ans: "b", text: "Tre distinti die semiconduttori emettitori (Rosso, Verde, Blu)." },
+            q19: { ans: "b", text: "La diminuzione della luminosità a causa della riduzione della corrente circolante." },
+            q20: { ans: "vero", text: "Vero. Il convertitore ADC è necessario per leggere i valori di tensione continui generati dal cursore." }
+        };
+
+        function avviaTimer() {
+            timerId = setInterval(() => {
+                elapsedSeconds++;
+                const min = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                const sec = (elapsedSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('timerDisplay').textContent = `${min}:${sec}`;
+            }, 1000);
+        }
+
+        function aggiornaAvanzamento() {
+            let compilate = 0;
+            for (let i = 1; i <= totaleDomande; i++) {
+                if (document.querySelector(`input[name="q${i}"]:checked`)) {
+                    compilate++;
+                }
+            }
+            const percentuale = (compilate / totaleDomande) * 100;
+            document.getElementById('progressBar').style.width = percentuale + '%';
+        }
+
+        function calcolaPunteggio() {
+            clearInterval(timerId);
+            document.getElementById('btnSubmit').disabled = true;
+
+            let punteggio = 0;
+            const inputRadio = document.querySelectorAll('input[type="radio"]');
+            
+            for (let i = 1; i <= totaleDomande; i++) {
+                const queryId = `q${i}`;
+                const scelta = document.querySelector(`input[name="${queryId}"]:checked`);
+                const pannello = document.getElementById(`fb-${queryId}`);
+                const data = dbRisposte[queryId];
+
+                if (scelta && scelta.value === data.ans) {
+                    punteggio++;
+                    pannello.className = "feedback-panel correct";
+                    pannello.innerHTML = `<strong>RISPOSTA CORRETTA</strong><div class="explanation">${data.text}</div>`;
+                } else {
+                    pannello.className = "feedback-panel incorrect";
+                    pannello.innerHTML = `<strong>RISPOSTA ERRATA / MANCANTE</strong><div class="explanation">Dato atteso: ${data.text}</div>`;
+                }
+            }
+
+            inputRadio.forEach(radio => radio.disabled = true);
+
+            document.getElementById('xpDisplay').textContent = (punteggio * 100).toString();
+            document.getElementById('scoreDisplay').textContent = `${punteggio} / ${totaleDomande}`;
+            
+            const badge = document.getElementById('rankBadge');
+            if (punteggio === totaleDomande) {
+                badge.textContent = "Sviluppatore Senior";
+                badge.style.backgroundColor = "var(--success)";
+                badge.style.color = "white";
+                document.getElementById('levelDisplay').textContent = "Senior";
+            } else if (punteggio >= 14) {
+                badge.textContent = "Tecnico Specializzato";
+                badge.style.backgroundColor = "var(--accent)";
+                badge.style.color = "white";
+                document.getElementById('levelDisplay').textContent = "Specializzato";
+            } else if (punteggio >= 10) {
+                badge.textContent = "Operatore Junior";
+                badge.style.backgroundColor = "#eab308";
+                badge.style.color = "#1e293b";
+                document.getElementById('levelDisplay').textContent = "Junior";
+            } else {
+                badge.textContent = "Formazione Richiesta";
+                badge.style.backgroundColor = "var(--error)";
+                badge.style.color = "white";
+                document.getElementById('levelDisplay').textContent = "Base";
+            }
+
+            document.getElementById('resultsSummary').style.display = "block";
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            avviaTimer();
+            
+            const radios = document.querySelectorAll('input[type="radio"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', aggiornaAvanzamento);
+            });
+
+            document.getElementById('btnSubmit').addEventListener('click', calcolaPunteggio);
+        });
+    </script>
+</body>
+</html>
