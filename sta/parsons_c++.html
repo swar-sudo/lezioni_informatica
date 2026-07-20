@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino C++ | Code Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --bg-main: #121212;
+            --bg-card: #1e1e1e;
+            --bg-hover: #2a2d3e;
+            --text-main: #e0e0e0;
+            --text-muted: #8b949e;
+            --accent: #007acc;
+            --accent-hover: #0098ff;
+            --success: #238636;
+            --error: #da3633;
+            --border: #30363d;
+            
+            /* Syntax Highlighting Colors */
+            --syn-keyword: #569cd6;
+            --syn-func: #dcdcaa;
+            --syn-num: #b5cea8;
+            --syn-string: #ce9178;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border);
+            border-radius: 3px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .level-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .instruction {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: #c9d1d9;
+        }
+
+        .sortable-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sortable-item {
+            font-family: 'Fira Code', monospace;
+            background-color: #161b22;
+            border: 1px solid var(--border);
+            padding: 14px 20px;
+            border-radius: 6px;
+            cursor: grab;
+            font-size: 0.95rem;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .sortable-item::before {
+            content: '⋮⋮';
+            color: var(--text-muted);
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .sortable-item:hover {
+            border-color: var(--accent);
+            background-color: var(--bg-hover);
+        }
+
+        .sortable-item:active {
+            cursor: grabbing;
+        }
+
+        .sortable-item.dragging {
+            opacity: 0;
+        }
+
+        .sortable-item.ghost {
+            opacity: 0.5;
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback.success {
+            background-color: rgba(35, 134, 54, 0.2);
+            color: #3fb950;
+            border: 1px solid var(--success);
+        }
+
+        .feedback.error {
+            background-color: rgba(218, 54, 51, 0.2);
+            color: #ff7b72;
+            border: 1px solid var(--error);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: var(--syn-keyword); }
+        .fn { color: var(--syn-func); }
+        .num { color: var(--syn-num); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Code Challenge C++</h1>
+        <p>Ricostruisci la sequenza logica degli algoritmi per Arduino</p>
+    </div>
+
+    <div class="container">
+        <div id="quiz-screen" class="screen active">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            
+            <div class="level-header">
+                <div class="level-title" id="level-title">Livello 1</div>
+                <div class="level-counter" id="level-counter">1/5</div>
+            </div>
+            
+            <div class="instruction" id="instruction"></div>
+            
+            <ul class="sortable-list" id="lista-codice"></ul>
+            
+            <div class="controls">
+                <button onclick="verificaOrdine()">Verifica Algoritmo</button>
+            </div>
+            
+            <div id="feedback-msg" class="feedback"></div>
+        </div>
+
+        <div id="end-screen" class="screen" style="text-align: center; padding: 40px 0;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <h2 style="margin-top:0;">Esercitazione Superata!</h2>
+            <p style="color: var(--text-muted);">Ottimo lavoro! Hai dimostrato di saper gestire variabili, cicli, condizioni e le funzioni base di Arduino.</p>
+            <button onclick="location.reload()" style="margin-top: 20px; background-color: var(--success);">Ricomincia Sfida</button>
+        </div>
+    </div>
+
+    <script>
+        const livelli = [
+            {
+                titolo: "Dichiarazioni e Setup",
+                descrizione: "Dichiara le variabili per un LED e un potenziometro, poi configurali correttamente all'interno della funzione setup().",
+                codice: [
+                    { id: 1, testo: "<span class='kw'>int</span> pinLed = <span class='num'>9</span>;" },
+                    { id: 2, testo: "<span class='kw'>int</span> pinPot = A0;" },
+                    { id: 3, testo: "<span class='kw'>void</span> <span class='fn'>setup</span>() {" },
+                    { id: 4, testo: "&nbsp;&nbsp;<span class='fn'>pinMode</span>(pinLed, OUTPUT);" },
+                    { id: 5, testo: "&nbsp;&nbsp;<span class='fn'>pinMode</span>(pinPot, INPUT);" },
+                    { id: 6, testo: "}" }
+                ]
+            },
+            {
+                titolo: "Controllo Condizionale (If / Else)",
+                descrizione: "Leggi il valore del potenziometro all'interno del loop(). Se il valore supera 512, accendi il LED, altrimenti spegnilo.",
+                codice: [
+                    { id: 1, testo: "<span class='kw'>void</span> <span class='fn'>loop</span>() {" },
+                    { id: 2, testo: "&nbsp;&nbsp;<span class='kw'>int</span> valore = <span class='fn'>analogRead</span>(A0);" },
+                    { id: 3, testo: "&nbsp;&nbsp;<span class='kw'>if</span> (valore &gt; <span class='num'>512</span>) {" },
+                    { id: 4, testo: "&nbsp;&nbsp;&nbsp;&nbsp;<span class='fn'>digitalWrite</span>(<span class='num'>9</span>, HIGH);" },
+                    { id: 5, testo: "&nbsp;&nbsp;} <span class='kw'>else</span> {" },
+                    { id: 6, testo: "&nbsp;&nbsp;&nbsp;&nbsp;<span class='fn'>digitalWrite</span>(<span class='num'>9</span>, LOW);" },
+                    { id: 7, testo: "&nbsp;&nbsp;}" },
+                    { id: 8, testo: "}" }
+                ]
+            },
+            {
+                titolo: "Inizializzazione con Ciclo For",
+                descrizione: "Usa un ciclo for nel setup() per impostare i pin dal 2 al 6 come OUTPUT, accendendoli in sequenza con una pausa.",
+                codice: [
+                    { id: 1, testo: "<span class='kw'>void</span> <span class='fn'>setup</span>() {" },
+                    { id: 2, testo: "&nbsp;&nbsp;<span class='kw'>for</span> (<span class='kw'>int</span> i = <span class='num'>2</span>; i &lt;= <span class='num'>6</span>; i++) {" },
+                    { id: 3, testo: "&nbsp;&nbsp;&nbsp;&nbsp;<span class='fn'>pinMode</span>(i, OUTPUT);" },
+                    { id: 4, testo: "&nbsp;&nbsp;&nbsp;&nbsp;<span class='fn'>digitalWrite</span>(i, HIGH);" },
+                    { id: 5, testo: "&nbsp;&nbsp;&nbsp;&nbsp;<span class='fn'>delay</span>(<span class='num'>200</span>);" },
+                    { id: 6, testo: "&nbsp;&nbsp;}" },
+                    { id: 7, testo: "}" }
+                ]
+            },
+            {
+                titolo: "Regolazione Luminosità (PWM)",
+                descrizione: "Nel loop(), leggi il potenziometro (0-1023), adattalo scalandolo a 8 bit (0-255) dividendolo per 4, e usalo per il segnale PWM.",
+                codice: [
+                    { id: 1, testo: "<span class='kw'>void</span> <span class='fn'>loop</span>() {" },
+                    { id: 2, testo: "&nbsp;&nbsp;<span class='kw'>int</span> letturaPot = <span class='fn'>analogRead</span>(A0);" },
+                    { id: 3, testo: "&nbsp;&nbsp;<span class='kw'>int</span> luminosita = letturaPot / <span class='num'>4</span>;" },
+                    { id: 4, testo: "&nbsp;&nbsp;<span class='fn'>analogWrite</span>(<span class='num'>3</span>, luminosita);" },
+                    { id: 5, testo: "&nbsp;&nbsp;<span class='fn'>delay</span>(<span class='num'>10</span>);" },
+                    { id: 6, testo: "}" }
+                ]
+            },
+            {
+                titolo: "Funzione Personalizzata (LED RGB)",
+                descrizione: "Ricostruisci una funzione personalizzata per inviare i segnali PWM ai 3 pin del LED RGB e richiamala nel loop per colorarlo di rosso.",
+                codice: [
+                    { id: 1, testo: "<span class='kw'>void</span> <span class='fn'>impostaColore</span>(<span class='kw'>int</span> r, <span class='kw'>int</span> g, <span class='kw'>int</span> b) {" },
+                    { id: 2, testo: "&nbsp;&nbsp;<span class='fn'>analogWrite</span>(<span class='num'>9</span>, r);" },
+                    { id: 3, testo: "&nbsp;&nbsp;<span class='fn'>analogWrite</span>(<span class='num'>10</span>, g);" },
+                    { id: 4, testo: "&nbsp;&nbsp;<span class='fn'>analogWrite</span>(<span class='num'>11</span>, b);" },
+                    { id: 5, testo: "}" },
+                    { id: 6, testo: "<span class='kw'>void</span> <span class='fn'>loop</span>() {" },
+                    { id: 7, testo: "&nbsp;&nbsp;<span class='fn'>impostaColore</span>(<span class='num'>255</span>, <span class='num'>0</span>, <span class='num'>0</span>);" },
+                    { id: 8, testo: "}" }
+                ]
+            }
+        ];
+
+        let livelloCorrente = 0;
+
+        function mescolaArray(array) {
+            let arrCopia = [...array];
+            for (let i = arrCopia.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arrCopia[i], arrCopia[j]] = [arrCopia[j], arrCopia[i]];
+            }
+            return arrCopia;
+        }
+
+        function caricaLivello(indice) {
+            if (indice >= livelli.length) {
+                document.getElementById('quiz-screen').classList.remove('active');
+                document.getElementById('end-screen').classList.add('active');
+                return;
+            }
+
+            const livello = livelli[indice];
+            let frammentiMescolati = mescolaArray(livello.codice);
+            
+            // Forza una mescolatura diversa se capita già ordinato per caso
+            if (frammentiMescolati.every((v, i) => v.id === livello.codice[i].id)) {
+                frammentiMescolati.push(frammentiMescolati.shift()); 
+            }
+
+            // Aggiorna UI Testuale
+            document.getElementById('level-title').innerText = livello.titolo;
+            document.getElementById('level-counter').innerText = `${indice + 1}/${livelli.length}`;
+            document.getElementById('instruction').innerText = livello.descrizione;
+            
+            // Aggiorna Progress Bar
+            const progresso = (indice / livelli.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progresso}%`;
+
+            // Reset Feedback
+            nascondiFeedback();
+
+            // Genera Nodi Lista
+            const lista = document.getElementById('lista-codice');
+            lista.innerHTML = '';
+
+            frammentiMescolati.forEach((riga) => {
+                const li = document.createElement('li');
+                li.className = 'sortable-item';
+                li.draggable = true;
+                li.innerHTML = riga.testo;
+                li.dataset.id = riga.id; 
+                lista.appendChild(li);
+            });
+
+            inizializzaDragAndDrop();
+        }
+
+        function inizializzaDragAndDrop() {
+            const list = document.getElementById('lista-codice');
+            const items = list.querySelectorAll('.sortable-item');
+
+            items.forEach(item => {
+                item.addEventListener('dragstart', () => {
+                    setTimeout(() => item.classList.add('dragging'), 0);
+                });
+
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                });
+            });
+
+            list.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const draggingItem = document.querySelector('.dragging');
+                if(!draggingItem) return;
+                
+                const siblings = [...list.querySelectorAll('.sortable-item:not(.dragging)')];
+                let nextSibling = siblings.find(sibling => {
+                    return e.clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2;
+                });
+                
+                list.insertBefore(draggingItem, nextSibling || null);
+            });
+        }
+
+        function mostraFeedback(messaggio, tipo) {
+            const fb = document.getElementById('feedback-msg');
+            fb.className = `feedback show ${tipo}`;
+            fb.innerText = messaggio;
+        }
+
+        function nascondiFeedback() {
+            const fb = document.getElementById('feedback-msg');
+            fb.className = 'feedback';
+        }
+
+        function verificaOrdine() {
+            const items = document.querySelectorAll('.sortable-item');
+            const sequenzaAttuale = Array.from(items).map(item => parseInt(item.dataset.id));
+            
+            let isCorretta = true;
+            for(let i = 0; i < sequenzaAttuale.length; i++) {
+                if(sequenzaAttuale[i] !== i + 1) {
+                    isCorretta = false;
+                    break;
+                }
+            }
+
+            if (isCorretta) {
+                mostraFeedback('✅ Compilazione completata! Logica esatta.', 'success');
+                setTimeout(() => {
+                    livelloCorrente++;
+                    caricaLivello(livelloCorrente);
+                }, 1800);
+            } else {
+                mostraFeedback('❌ Errore di sintassi o logica. Ricontrolla il flusso.', 'error');
+                setTimeout(nascondiFeedback, 3000);
+            }
+        }
+
+        // Avvio Applicazione
+        document.addEventListener('DOMContentLoaded', () => {
+            caricaLivello(livelloCorrente);
+        });
+    </script>
+</body>
+</html>
