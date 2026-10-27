@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Flashcard Laboratorio Informatica - TIC</title>
     <style>
         :root {
@@ -33,6 +33,7 @@
         header {
             text-align: center;
             margin-bottom: 1.5rem;
+            width: 100%;
         }
 
         h1 {
@@ -50,6 +51,7 @@
             align-items: center;
             gap: 10px;
             border: 2px solid var(--primary-color);
+            max-width: 100%;
         }
 
         .topic-selector select {
@@ -61,6 +63,7 @@
             cursor: pointer;
             font-weight: bold;
             color: var(--primary-color);
+            width: 100%;
         }
 
         .flashcard-container {
@@ -107,6 +110,7 @@
             background-color: var(--primary-color);
             color: white;
             border-color: var(--secondary-color);
+            overflow-y: auto; /* Permette lo scroll interno se il testo è troppo lungo */
         }
 
         .label {
@@ -128,6 +132,7 @@
             font-size: 1.4rem;
             line-height: 1.4;
             font-weight: 500;
+            width: 100%;
         }
 
         .card-back .content {
@@ -139,18 +144,23 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            width: 100%;
+            max-width: 650px;
+            justify-content: space-between;
         }
 
         button {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 1rem;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.2s;
             font-weight: bold;
+            flex: 1; /* Permette ai pulsanti di allargarsi */
+            max-width: 45%;
         }
 
         button:hover {
@@ -165,9 +175,9 @@
         .progress {
             font-size: 1.1rem;
             font-weight: bold;
-            min-width: 100px;
             text-align: center;
             color: var(--secondary-color);
+            min-width: 60px;
         }
 
         .instructions {
@@ -176,12 +186,62 @@
             color: #666;
             text-align: center;
         }
+
+        /* ----- REGOLE RESPONSIVE PER SMARTPHONE ----- */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            header p {
+                font-size: 0.9rem;
+            }
+
+            .topic-selector {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+                padding: 10px;
+            }
+
+            /* La card diventa più alta per far spazio al testo che va a capo su schermi stretti */
+            .flashcard-container {
+                height: 400px;
+                margin-bottom: 1.5rem;
+            }
+
+            .card-face {
+                padding: 1.5rem 1rem; /* Riduciamo i bordi interni per dare più spazio al testo */
+            }
+
+            /* Ridimensionamento testi per mobile */
+            .content {
+                font-size: 1.15rem; 
+            }
+
+            .card-back .content {
+                font-size: 1.05rem; 
+            }
+
+            button {
+                padding: 12px 10px;
+                font-size: 0.9rem;
+            }
+
+            .progress {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Laboratorio TIC e Informatica</h1>
+        <h1>Laboratorio TIC</h1>
         <p>Prepara la tua verifica scegliendo l'argomento da ripassare</p>
     </header>
 
@@ -216,7 +276,7 @@
     </div>
 
     <div class="instructions">
-        Clicca sulla carta per girarla e vedere la risposta.
+        Tocca la carta per girarla e vedere la risposta.
     </div>
 
     <script>
@@ -281,7 +341,6 @@
         const nextBtn = document.getElementById('next-btn');
         const topicLabel = document.getElementById('card-topic-front');
 
-        // Funzione per capire il nome dell'argomento
         function getTopicName(topicCode) {
             switch(topicCode) {
                 case 'web': return 'Web e Privacy';
@@ -292,7 +351,6 @@
             }
         }
 
-        // Funzione per filtrare le carte in base al selettore
         function filterTopic() {
             const selectedTopic = document.getElementById('topic-select').value;
             
@@ -304,11 +362,10 @@
             
             currentIndex = 0;
             
-            // Se la carta è girata, rigirala prima di aggiornare
             if (flashcard.classList.contains('flipped')) {
                 flashcard.classList.remove('flipped');
                 setTimeout(() => {
-                    updateCard(true); // true = non aspettare l'animazione di nuovo
+                    updateCard(true); 
                 }, 300);
             } else {
                 updateCard();
@@ -331,7 +388,6 @@
             answerText.textContent = filteredCards[currentIndex].a;
             progressText.textContent = `${currentIndex + 1} / ${filteredCards.length}`;
             
-            // Aggiorna l'etichetta dell'argomento in alto a sinistra della card
             topicLabel.textContent = getTopicName(filteredCards[currentIndex].topic);
             
             prevBtn.disabled = currentIndex === 0;
@@ -356,7 +412,6 @@
             }
         }
 
-        // Avvio app
         updateCard();
     </script>
 </body>
