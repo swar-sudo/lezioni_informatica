@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Laboratorio Informatica - TIC</title>
+    <style>
+        :root {
+            --primary-color: #1A73E8; /* Tech Blue */
+            --secondary-color: #1557b0;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-selector {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid var(--primary-color);
+        }
+
+        .topic-selector select {
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 650px;
+            height: 350px;
+            margin-bottom: 2rem;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            border-radius: 12px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            border: 3px solid var(--primary-color);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+            position: absolute;
+            top: 20px;
+            font-weight: bold;
+        }
+
+        .card-back .label {
+            color: #e8f0fe;
+        }
+
+        .content {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .card-back .content {
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #b0cbec;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Laboratorio TIC e Informatica</h1>
+        <p>Prepara la tua verifica scegliendo l'argomento da ripassare</p>
+    </header>
+
+    <div class="topic-selector">
+        <label for="topic-select">Argomento:</label>
+        <select id="topic-select" onchange="filterTopic()">
+            <option value="all">Tutti gli argomenti (40)</option>
+            <option value="web">Web, Privacy e GDPR</option>
+            <option value="hwsw">Hardware e Software</option>
+            <option value="email">Gestione Email Formale</option>
+            <option value="workspace">Google Workspace (Drive, Docs, Slide)</option>
+        </select>
+    </div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+            <div class="card-face card-front">
+                <span class="label" id="card-topic-front">Domanda</span>
+                <div class="content" id="question-text">Caricamento...</div>
+            </div>
+            <div class="card-face card-back">
+                <span class="label">Risposta</span>
+                <div class="content" id="answer-text">Caricamento...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prev-btn" onclick="prevCard()">&#8592; Precedente</button>
+        <div class="progress" id="progress-text">1 / 40</div>
+        <button id="next-btn" onclick="nextCard()">Successiva &#8594;</button>
+    </div>
+
+    <div class="instructions">
+        Clicca sulla carta per girarla e vedere la risposta.
+    </div>
+
+    <script>
+        const allCards = [
+            // Categoria 1: Web, Privacy e GDPR (7 domande)
+            { topic: "web", q: "Cos'è un browser web?", a: "È un'applicazione software che consente di cercare, recuperare e visualizzare contenuti su internet (come pagine, immagini, video)." },
+            { topic: "web", q: "Fai alcuni esempi di browser famosi.", a: "Google Chrome, Apple Safari, Microsoft Edge, Mozilla Firefox." },
+            { topic: "web", q: "Cos'è un motore di ricerca e quali sono alcuni esempi?", a: "È un servizio web (raggiungibile tramite il browser) per trovare contenuti inserendo parole chiave. Esempi: Google, Bing, DuckDuckGo, Qwant." },
+            { topic: "web", q: "In cosa consiste la profilazione dei dati sul Web?", a: "È l'atto di raccogliere, filtrare e analizzare i dati degli utenti (spesso tramite cookies) per prevedere comportamenti e orientare decisioni." },
+            { topic: "web", q: "Qual è lo scopo principale della profilazione?", a: "Costruire pubblicità e sponsorizzazioni calibrate sugli interessi dell'utente per spingerlo ad acquistare prodotti o servizi." },
+            { topic: "web", q: "Cos'è il GDPR?", a: "È il General Data Protection Regulation, la normativa europea che disciplina il trattamento dei dati personali e la privacy." },
+            { topic: "web", q: "In quali casi il GDPR ammette la profilazione dei dati?", a: "Quando è essenziale per un contratto, quando è autorizzata dalla legge, o quando vi è l'esplicito consenso dell'utente." },
+
+            // Categoria 2: Hardware e Software (6 domande)
+            { topic: "hwsw", q: "Cos'è l'Hardware?", a: "L'insieme di tutte le componenti fisiche, elettroniche e tangibili di un computer (es. monitor, tastiera, circuiti)." },
+            { topic: "hwsw", q: "Cos'è il Software?", a: "L'insieme dei programmi informatici, delle applicazioni e delle istruzioni che dicono all'hardware come funzionare." },
+            { topic: "hwsw", q: "Qual è la funzione della CPU?", a: "È il processore (Central Processing Unit), il vero e proprio 'cervello' del computer che elabora e calcola i dati." },
+            { topic: "hwsw", q: "A cosa serve la memoria RAM?", a: "È la memoria di lavoro a breve termine, veloce e temporanea, dove il computer salva i dati dei programmi attualmente in esecuzione." },
+            { topic: "hwsw", q: "A cosa serve il Disco Rigido?", a: "È la memoria di archiviazione di massa in cui vengono salvati permanentemente file, documenti e programmi." },
+            { topic: "hwsw", q: "Cos'è un Sistema Operativo?", a: "È il software di base (es. Windows, macOS) che gestisce le risorse hardware e permette di far funzionare tutti gli altri programmi." },
+
+            // Categoria 3: Email Formale (8 domande)
+            { topic: "email", q: "A cosa serve un 'provider' per la posta elettronica?", a: "È il fornitore del servizio a cui bisogna affidarsi per poter creare e gestire una casella email." },
+            { topic: "email", q: "Quali sono le 4 sezioni fondamentali che compongono la struttura di un'email?", a: "Oggetto, Introduzione, Corpo del messaggio, Saluti finali." },
+            { topic: "email", q: "Come deve essere scritto l'Oggetto di un'email formale?", a: "Deve essere chiaro ed esplicito, per far comprendere al destinatario il tema in modo inequivocabile." },
+            { topic: "email", q: "Quali aggettivi si usano solitamente per introdurre il destinatario in un'email formale?", a: "Si usano formule e aggettivi di circostanza generici come 'Egregio/i' o 'Spettabile/i'." },
+            { topic: "email", q: "Quali sono le regole d'oro per organizzare il Corpo di un'email?", a: "Andare dritti al punto, dividere in paragrafi ordinati, usare correttamente la punteggiatura e segnalare sempre gli allegati." },
+            { topic: "email", q: "Cosa significa inviare un'email a più persone usando il campo CC?", a: "Significa inviarla in 'Copia Conoscenza': tutti i destinatari inseriti in questo campo potranno vedere chi altri ha ricevuto la mail." },
+            { topic: "email", q: "Qual è la differenza fondamentale se si usa il campo CCN invece del CC?", a: "CCN significa 'Copia Conoscenza Nascosta': il mittente nasconde gli indirizzi degli altri destinatari, tutelando la privacy." },
+            { topic: "email", q: "Come si fa a programmare l'invio posticipato di un'email?", a: "Si utilizza il menù a tendina situato di fianco al tasto 'Invia' per scegliere la data e l'ora di invio." },
+
+            // Categoria 4: Google Workspace - Drive, Docs, Slide (19 domande)
+            { topic: "workspace", q: "Come si crea una struttura gerarchica su Google Drive?", a: "Creando una cartella principale (es. Cognome_Nome_Informatica) e inserendo al suo interno delle sottocartelle (es. Laboratorio_01, Appunti)." },
+            { topic: "workspace", q: "Perché è utile cambiare il colore delle cartelle su Google Drive?", a: "Per permettere una categorizzazione visiva immediata e organizzare meglio i metadati." },
+            { topic: "workspace", q: "Quali sono i tre livelli principali di permessi per condividere un file su Drive?", a: "Visualizzatore, Commentatore o Editor (per chi deve poter modificare il file in modo attivo)." },
+            { topic: "workspace", q: "Come si condivide una cartella o file senza intasare la posta del docente?", a: "Condividendo l'elemento ma ricordandosi di togliere la spunta dall'opzione 'Invia notifica via e-mail'." },
+            { topic: "workspace", q: "Come si rinomina un file su Google Docs o Presentazioni?", a: "Cliccando sul nome del file in alto a sinistra dell'interfaccia e digitando il nuovo nome richiesto." },
+            { topic: "workspace", q: "Come fai a collaborare in tempo reale su Google Docs con un tuo compagno?", a: "Devi condividere il documento assegnandogli i permessi di 'Editor'." },
+            { topic: "workspace", q: "Come si consegna un lavoro svolto su Google Workspace?", a: "Condividendo il file in modalità 'Visualizzatore' con il docente e consegnando il link di condivisione." },
+            { topic: "workspace", q: "Come deve essere strutturata la Diapositiva di Copertina di una presentazione?", a: "Deve contenere un titolo grande in grassetto (es. 45-60pt) e un sottotitolo più piccolo con Nome, Cognome e Classe." },
+            { topic: "workspace", q: "Quali layout sono consigliati per le slide di contenuto?", a: "Le disposizioni 'Titolo e corpo' oppure 'Due colonne', per mantenere l'ordine visivo." },
+            { topic: "workspace", q: "Qual è la regola fondamentale per il testo all'interno di una slide?", a: "Deve essere molto conciso (massimo 2-3 righe), preferibilmente sintetizzato in un elenco puntato." },
+            { topic: "workspace", q: "Quali tipi di font (caratteri) sono raccomandati per le presentazioni?", a: "Font moderni, leggibili e privi di grazie (sans-serif) come Arial, Roboto, Open Sans o Montserrat." },
+            { topic: "workspace", q: "Quali stili e colori vanno assolutamente evitati in una presentazione?", a: "Vanno evitati i caratteri in corsivo e l'uso di colori fluorescenti o accecanti." },
+            { topic: "workspace", q: "Cosa si intende per 'elevato contrasto' in una slide?", a: "Garantire che il testo sia chiaramente leggibile rispetto allo sfondo (es. testo scuro su sfondo chiaro, o viceversa)." },
+            { topic: "workspace", q: "Qual è la regola d'oro per le transizioni tra diapositive?", a: "Applicare una singola transizione sobria (es. Dissolvenza) e mantenerla uniforme e uguale per tutte le slide." },
+            { topic: "workspace", q: "Come si anima un'immagine in Google Presentazioni?", a: "Selezionando l'immagine e aggiungendo un'animazione semplice di entrata (es. 'Entrata da sinistra')." },
+            { topic: "workspace", q: "Quali sono i passaggi della 'Revisione Finale' di una presentazione?", a: "Avviare la modalità a schermo intero per verificare leggibilità, qualità visiva delle immagini e assenza di errori di battitura." },
+            { topic: "workspace", q: "In un documento (come Docs o Writer), come va posizionata un'immagine associata a una definizione?", a: "È raccomandato posizionarla centrata o ben allineata, per mantenere un'impaginazione pulita." },
+            { topic: "workspace", q: "Se usi LibreOffice Writer invece di Google Docs, in quali formati deve essere salvato il file per la consegna?", a: "Generalmente viene richiesto di consegnare sia il file nativo modificabile (.odt) sia la stampa in formato fisso (.pdf)." },
+            { topic: "workspace", q: "Quali elementi ricorrenti vanno inseriti nelle pagine di un documento formale su LibreOffice Writer?", a: "Il logo all'interno dell'intestazione di pagina e il numero di pagina nel piè di pagina." }
+        ];
+
+        let filteredCards = [...allCards];
+        let currentIndex = 0;
+        
+        const flashcard = document.getElementById('flashcard');
+        const questionText = document.getElementById('question-text');
+        const answerText = document.getElementById('answer-text');
+        const progressText = document.getElementById('progress-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const topicLabel = document.getElementById('card-topic-front');
+
+        // Funzione per capire il nome dell'argomento
+        function getTopicName(topicCode) {
+            switch(topicCode) {
+                case 'web': return 'Web e Privacy';
+                case 'hwsw': return 'Hardware & Software';
+                case 'email': return 'Email Formale';
+                case 'workspace': return 'Google Workspace';
+                default: return 'Domanda';
+            }
+        }
+
+        // Funzione per filtrare le carte in base al selettore
+        function filterTopic() {
+            const selectedTopic = document.getElementById('topic-select').value;
+            
+            if (selectedTopic === 'all') {
+                filteredCards = [...allCards];
+            } else {
+                filteredCards = allCards.filter(card => card.topic === selectedTopic);
+            }
+            
+            currentIndex = 0;
+            
+            // Se la carta è girata, rigirala prima di aggiornare
+            if (flashcard.classList.contains('flipped')) {
+                flashcard.classList.remove('flipped');
+                setTimeout(() => {
+                    updateCard(true); // true = non aspettare l'animazione di nuovo
+                }, 300);
+            } else {
+                updateCard();
+            }
+        }
+
+        function updateCard(immediate = false) {
+            if (flashcard.classList.contains('flipped') && !immediate) {
+                flashcard.classList.remove('flipped');
+                setTimeout(() => {
+                    populateText();
+                }, 300);
+            } else {
+                populateText();
+            }
+        }
+
+        function populateText() {
+            questionText.textContent = filteredCards[currentIndex].q;
+            answerText.textContent = filteredCards[currentIndex].a;
+            progressText.textContent = `${currentIndex + 1} / ${filteredCards.length}`;
+            
+            // Aggiorna l'etichetta dell'argomento in alto a sinistra della card
+            topicLabel.textContent = getTopicName(filteredCards[currentIndex].topic);
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === filteredCards.length - 1;
+        }
+
+        function flipCard() {
+            flashcard.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < filteredCards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        // Avvio app
+        updateCard();
+    </script>
+</body>
+</html>
